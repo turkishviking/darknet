@@ -317,6 +317,23 @@ bool ArapahoV2::GetBoxes(box* outBoxes, std::string* outLabels, int boxCount)
     return true;
 }
 
+void ArapahoV2::cleanDetections()
+{
+
+    if(dets)
+    {
+        int i;
+        for(i = 0; i < nboxes; ++i)
+        {
+            if(dets[i].prob)
+                delete[] dets[i].prob;
+            if(dets[i].mask)
+                delete[] dets[i].mask;
+        }
+        free(dets);
+    }
+}
+
 //////////////////////////////////////////////////////////////////
 /// Private APIs
 //////////////////////////////////////////////////////////////////

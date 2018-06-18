@@ -1,0 +1,1 @@
+/usr/bin/g++      CMakeFiles/arapaho.dir/yolopp.cpp.o CMakeFiles/arapaho.dir/test.cpp.o CMakeFiles/arapaho.dir/arapaho.cpp.o  -o arapaho  -L/usr/local/cuda/lib64  -L/home/charlie/Documents/Two-i/darknet/arapaho/yolo -rdynamic -ldarknet-cpp-shared -lcuda -lcudart -lcublas -lcurand -Wl,-rpath,/usr/local/cuda/lib64:/home/charlie/Documents/Two-i/darknet/arapaho/yolo 

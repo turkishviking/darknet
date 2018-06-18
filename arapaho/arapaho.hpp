@@ -82,6 +82,7 @@
             int & objectCount);
 
         bool GetBoxes(box* outBoxes, std::string* outLabels, int boxCount);
+        void cleanDetections();
     private:
         detection *dets;
         int     nboxes;

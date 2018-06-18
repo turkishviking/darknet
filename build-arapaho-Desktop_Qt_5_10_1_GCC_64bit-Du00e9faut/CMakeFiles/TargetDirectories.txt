@@ -1,0 +1,4 @@
+/home/charlie/Documents/Two-i/darknet/build-arapaho-Desktop_Qt_5_10_1_GCC_64bit-Du00e9faut/CMakeFiles/rebuild_cache.dir
+/home/charlie/Documents/Two-i/darknet/build-arapaho-Desktop_Qt_5_10_1_GCC_64bit-Du00e9faut/CMakeFiles/edit_cache.dir
+/home/charlie/Documents/Two-i/darknet/build-arapaho-Desktop_Qt_5_10_1_GCC_64bit-Du00e9faut/CMakeFiles/arapaho.dir
+/home/charlie/Documents/Two-i/darknet/build-arapaho-Desktop_Qt_5_10_1_GCC_64bit-Du00e9faut/CMakeFiles/headers.dir
