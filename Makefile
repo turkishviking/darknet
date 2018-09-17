@@ -73,9 +73,9 @@ endif
 CFLAGS+=$(OPTS)
 
 ifeq ($(OPENCV), 1) 
-COMMON+= -DOPENCV
+COMMON+= -DOPENCV -I/usr/local/opencv/include
 CFLAGS+= -DOPENCV
-LDFLAGS+= `pkg-config --libs opencv` 
+LDFLAGS+= -L/usr/local/opencv/lib64`pkg-config --libs opencv` 
 COMMON+= `pkg-config --cflags opencv` 
 endif
 
@@ -85,7 +85,7 @@ LDFLAGS += -L./3rdparty
 ifeq ($(GPU), 1) 
 COMMON+= -DGPU -I/usr/local/cuda/include/
 CFLAGS+= -DGPU
-LDFLAGS+= -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand
+LDFLAGS+= -L/usr/local/cuda/lib -lcuda -lcudart -lcublas -lcurand
 endif
 
 ifeq ($(CUDNN), 1) 
