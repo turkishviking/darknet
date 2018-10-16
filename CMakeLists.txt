@@ -3,9 +3,9 @@ set(CMAKE_CXX_STANDARD 11)
 project(darknet)
 set(LIBNAME ${PROJECT_NAME}-cpp)
 
-option(USE_GPU "Use GPU support" FALSE)
-option(USE_CUDNN "Use CUDNN support" FALSE)
-option(USE_OPENCV "Use OpenCV support" FALSE)
+option(USE_GPU "Use GPU support" TRUE)
+option(USE_CUDNN "Use CUDNN support" TRUE)
+option(USE_OPENCV "Use OpenCV support" TRUE)
 option(BUILD_SHARED_LIBS "Build a shared library" TRUE)
 # option(INSTALL_SOURCE_HEADERS "Install header files from the src directory" FALSE)
 

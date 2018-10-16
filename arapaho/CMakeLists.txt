@@ -2,25 +2,40 @@ cmake_minimum_required(VERSION 2.8)
 set (CMAKE_CXX_STANDARD 11)
 project(arapaho)
 
-
-#cuda stuff for yolo
-include_directories(/usr/local/cuda-8.0/include)# path to cuda include
-link_directories(/usr/local/cuda/lib64)# path to cuda src
 add_definitions(-DGPU)
 add_definitions(-DCUDNN)
-#yolo
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/../src)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/../include)
-link_directories(${CMAKE_SOURCE_DIR}/yolo)
 
-FILE(GLOB_RECURSE libFiles "${CMAKE_SOURCE_DIR}/*.h")
-add_custom_target(headers SOURCES ${libFiles})
+find_package( OpenCV REQUIRED )
 
-FILE(GLOB_RECURSE srcFiles "${CMAKE_SOURCE_DIR}/*.cpp")
+if(EXISTS "/etc/arch-release") #arch like cuda path
+    include_directories(/opt/cuda/include)
+    link_directories(/opt/cuda/lib64)
+else()
+    #debian like cuda path
+    include_directories(/usr/local/cuda/include)
+    link_directories(/usr/local/cuda/lib64)
+endif()
 
-add_executable(${PROJECT_NAME} ${srcFiles})
+link_directories(${CMAKE_SOURCE_DIR})
 
-target_link_libraries(  ${PROJECT_NAME}
-                        darknet-cpp-shared
-                        -lcuda -lcudart -lcublas -lcurand
-                      )
+add_executable(
+    ${PROJECT_NAME}
+    test.cpp
+    arapaho.cpp
+    yolopp.cpp
+    )
+
+target_include_directories(${PROJECT_NAME}
+    PUBLIC ${CMAKE_SOURCE_DIR}
+    PUBLIC ../src
+    PUBLIC ../include
+    )
+
+
+
+target_link_libraries(
+    ${PROJECT_NAME}
+    ${OpenCV_LIBS}
+    darknet-cpp
+    -lcuda -lcudart -lcublas -lcurand
+  )

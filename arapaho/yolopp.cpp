@@ -1,4 +1,6 @@
 #include "yolopp.h"
+#include "arapaho.hpp"
+
 
 Yolopp::Yolopp()
 {
@@ -61,7 +63,7 @@ void Yolopp::load(std::string data, std::string cfg, std::string weights)
 
 }
 
-std::vector<yoloDetections> Yolopp::detect(cv::Mat &inputImage, float &threshold, float &hierThreshold)
+std::vector<yoloDetections> Yolopp::detect(cv::Mat &inputImage, float &&threshold, float &&hierThreshold)
 {
     std::vector<yoloDetections> result;
 
