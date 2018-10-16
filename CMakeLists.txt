@@ -237,9 +237,9 @@ target_compile_definitions(${LIBNAME}
 	PRIVATE
 		# no need to add -D in front of the definitions
 		OPENCV
+		CV_MAJOR_VERSION=${OpenCV_VERSION_MAJOR}
 		$<$<BOOL:${USE_GPU}>:GPU>
 		$<$<BOOL:${USE_CUDNN}>:CUDNN>
-		$<$<BOOL:${USE_OPENCV}>:CV_MAJOR_VERSION=${OpenCV_VERSION_MAJOR}>
 )
 ## Set include directories
 target_include_directories(${LIBNAME}
@@ -247,9 +247,10 @@ target_include_directories(${LIBNAME}
 	PRIVATE $<$<BOOL:${USE_GPU}>:${CUDA_TOOLKIT_ROOT_DIR}/include>
 	PUBLIC include
 )
-if (USE_OPENCV)
-	target_include_directories(${LIBNAME} SYSTEM PRIVATE ${OpenCV_INCLUDE_DIRS})
-endif()
+target_include_directories(${LIBNAME} SYSTEM
+	PRIVATE ${OpenCV_INCLUDE_DIRS}
+)
+
 ## link libraries
 target_link_libraries(${LIBNAME}
 	PRIVATE ${CMAKE_THREAD_LIBS_INIT}
