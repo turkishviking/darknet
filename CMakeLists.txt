@@ -15,11 +15,11 @@ option(BUILD_SHARED_LIBS "Build a shared library" TRUE)
 message("")
 message("Options summary")
 message("---------------")
+message(" - Build shared library ... ${BUILD_SHARED_LIBS}")
 message(" - GPU support............. ${USE_GPU}")
 message(" - Cudnn support........... ${USE_CUDNN}")
 message(" - OpenCV support ......... ${USE_OPENCV}")
-message(" - Build shared library ... ${BUILD_SHARED_LIBS}")
-message(" - Install headers ........ ${INSTALL_SOURCE_HEADERS}")
+# message(" - Install headers ........ ${INSTALL_SOURCE_HEADERS}")
 message("")
 
 ##
@@ -192,7 +192,7 @@ endif()
 # OpenCV support
 ##
 if(USE_OPENCV)
-	find_package(OpenCV REQUIRED)	
+	find_package(OpenCV REQUIRED)
 	## List OpenCV libs to link darknet to (NOT SURE IT's needed buuuuuut...)
 	list(APPEND DARKNET_LINKED_LIBS opencv_core opencv_highgui opencv_imgproc)
 	if(OpenCV_VERSION_MAJOR GREATER 2)
@@ -219,7 +219,7 @@ target_compile_options(${LIBNAME} PRIVATE -Wall -Wfatal-errors -Wno-unknown-prag
 
 ## Set compile definitions
 target_compile_definitions(${LIBNAME}
-	PRIVATE 
+	PRIVATE
 		# no need to add -D in front of the definitions
 		$<$<BOOL:${USE_GPU}>:GPU>
 		$<$<BOOL:${USE_CUDNN}>:CUDNN>
@@ -278,7 +278,7 @@ target_link_libraries(${LIBNAME}
 # 	-DOPENCV
 # 	-DGPU
 # 	-DCUDNN
-	
+
 # 	-Isrc/
 # 	-Iinclude/
 # 	-I/usr/local/cuda/include/
@@ -301,13 +301,13 @@ target_link_libraries(${LIBNAME}
 		# -gencode arch=compute_35,code=sm_35
 		# -gencode arch=compute_50,code=[sm_50,compute_50]
 		# -gencode arch=compute_52,code=[sm_52,compute_52]
-		
+
 	## Include dirs
 		# -Isrc/
 		# -Iinclude/
-		# `pkg-config --cflags opencv` 
+		# `pkg-config --cflags opencv`
 		# -I/usr/local/cuda/include/
-	
+
 	## Darknet flags ?
 	# 	-DOPENCV
 	# 	-DGPU
@@ -321,7 +321,7 @@ target_link_libraries(${LIBNAME}
 # 	-DOPENCV
 # 	-DGPU
 # 	-DCUDNN
-	
+
 # 	-Isrc/
 # 	-Iinclude/
 # 	-I/usr/local/cuda/include/
@@ -337,7 +337,7 @@ target_link_libraries(${LIBNAME}
 # 	-DOPENCV
 # 	-DGPU
 # 	-DCUDNN
-	
+
 # 	-pthread
 # 	-lm
 
