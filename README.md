@@ -31,7 +31,30 @@ Darknet-cpp project is a bug-fixed and C++ compilable version of darknet (includ
 
 * Note: darknet-cpp requires a C++11 compiler for darknet-cpp, and arapaho builds.
 
-**Usage**
+**Usage (CMake)**
+
+The CMakeLists provide 4 build options:
+    - DUSE_GPU: Use CUDNN support, defaults to FALSE
+    - DUSE_CUDNN: Use OpenCV support, defaults to FALSE
+    - DUSE_OPENCV: Build a shared library, defaults to TRUE
+    - DBUILD_SHARED_LIBS: Use GPU support, defaults to FALSE
+
+To build the shared lib in the ```_build``` directory:
+```sh
+./configure
+./build
+#  use ./build -c to force rebuild
+```
+It will execute those commands:
+```sh
+# configure
+cmake . -B"_build" -DUSE_GPU=ON -DUSE_CUDNN=ON -DUSE_OPENCV=ON -DBUILD_SHARED_LIBS=ON
+# build
+cmake --build "_build" -- -j"$(nproc)"
+```
+
+**Usage (Makefile)**
+
 
 Using the Makefile in the root directory of the darknet source repository,
 
