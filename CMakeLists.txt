@@ -3,10 +3,9 @@ set(CMAKE_CXX_STANDARD 11)
 project(darknet)
 set(LIBNAME ${PROJECT_NAME}-cpp)
 
-option(USE_GPU "Use GPU support" TRUE)
-option(USE_CUDNN "Use CUDNN support" TRUE)
-option(USE_OPENCV "Use OpenCV support" TRUE)
 option(BUILD_SHARED_LIBS "Build a shared library" TRUE)
+option(USE_GPU "Use GPU support" TRUE)
+option(USE_CUDNN "Use cuDNN support" TRUE)
 # option(INSTALL_SOURCE_HEADERS "Install header files from the src directory" FALSE)
 
 ##
@@ -17,8 +16,7 @@ message("Options summary")
 message("---------------")
 message(" - Build shared library ... ${BUILD_SHARED_LIBS}")
 message(" - GPU support............. ${USE_GPU}")
-message(" - Cudnn support........... ${USE_CUDNN}")
-message(" - OpenCV support ......... ${USE_OPENCV}")
+message(" - cuDNN support........... ${USE_CUDNN}")
 # message(" - Install headers ........ ${INSTALL_SOURCE_HEADERS}")
 message("")
 
@@ -70,6 +68,7 @@ set(darknet_src
 	src/upsample_layer.c
 	src/utils.c
 	src/yolo_layer.c
+	src/arapaho.cpp
 	# examples/art.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
 	# examples/captcha.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
 	# examples/cifar.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
@@ -162,7 +161,7 @@ endif()
 ##
 if(USE_CUDNN)
 	if(NOT USE_GPU)
-		message(FATAL_ERROR "CUDNN support requires GPU support")
+		message(FATAL_ERROR "cuDNN support requires GPU support")
 	endif()
 
 	find_library(CUDNN_LIBRARIES
@@ -174,9 +173,9 @@ if(USE_CUDNN)
 
 	if(NOT CUDNN_LIBRARIES)
 		# Set this if cuda and cudnn are in seperate locations
-		set(CUDNN_TOOLKIT_ROOT_DIR "" CACHE PATH "CUDNN root folder")
-		message(FATAL_ERROR "Unable to find cudnn libraries, please ensure \
-			CUDA_TOOLKIT_ROOT_DIR has cudnn or the CUDNN_TOOLKIT_ROOT_DIR variable is \
+		set(CUDNN_TOOLKIT_ROOT_DIR "" CACHE PATH "cuDNN root folder")
+		message(FATAL_ERROR "Unable to find cuDNN libraries, please ensure \
+			CUDA_TOOLKIT_ROOT_DIR has cuDNN or the CUDNN_TOOLKIT_ROOT_DIR variable is \
 			properly set or set CUDNN_LIBRARIES")
 	endif()
 
@@ -189,16 +188,15 @@ if(USE_CUDNN)
 endif()
 
 ##
-# OpenCV support
+# OpenCV dependency
 ##
-if(USE_OPENCV)
-	find_package(OpenCV REQUIRED)
-	## List OpenCV libs to link darknet to (NOT SURE IT's needed buuuuuut...)
-	list(APPEND DARKNET_LINKED_LIBS opencv_core opencv_highgui opencv_imgproc)
-	if(OpenCV_VERSION_MAJOR GREATER 2)
-		list(APPEND DARKNET_LINKED_LIBS opencv_videoio opencv_imgcodecs)
-	endif()
-endif()
+find_package(OpenCV REQUIRED)
+## List OpenCV libs to link darknet to (NOT SURE IT's needed buuuuuut...
+## let's keep comment and delete that later)
+# list(APPEND DARKNET_LINKED_LIBS opencv_core opencv_highgui opencv_imgproc)
+# if(OpenCV_VERSION_MAJOR GREATER 2)
+	# list(APPEND DARKNET_LINKED_LIBS opencv_videoio opencv_imgcodecs)
+# endif()
 
 ##
 # Build the lib
@@ -215,15 +213,28 @@ add_library(${LIBNAME}
 # Add -Ofast for compilation
 
 ## Set compile options
-target_compile_options(${LIBNAME} PRIVATE -Wall -Wfatal-errors -Wno-unknown-pragmas -Wno-unused-result)
+target_compile_options(${LIBNAME} PRIVATE
+	-Wall
+	-Wfatal-errors
+	-Wno-unknown-pragmas
+	-Wno-unused-variable
+	-Wno-unused-value
+	-Wno-unused-result
+	# There is a compile error happening only when optimisation is not on.
+	# Needed on Cygwin + OpenCV-3.4.1 + Intel Core i5 3570
+	# see https://github.com/leggedrobotics/darknet_ros/issues/1#issuecomment-298329957
+	-O4 # max optimiszation
+	# -Og # Optimize debugging experience
+	# -g # ??????? no idea =)
+)
 
 ## Set compile definitions
 target_compile_definitions(${LIBNAME}
 	PRIVATE
 		# no need to add -D in front of the definitions
+		OPENCV
 		$<$<BOOL:${USE_GPU}>:GPU>
 		$<$<BOOL:${USE_CUDNN}>:CUDNN>
-		$<$<BOOL:${USE_OPENCV}>:OPENCV>
 		$<$<BOOL:${USE_OPENCV}>:CV_MAJOR_VERSION=${OpenCV_VERSION_MAJOR}>
 )
 ## Set include directories
