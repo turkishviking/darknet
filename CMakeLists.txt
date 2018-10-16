@@ -68,7 +68,11 @@ set(darknet_src
 	src/upsample_layer.c
 	src/utils.c
 	src/yolo_layer.c
+	# cpp wrapper from https://github.com/prabindh/darknet/tree/master/arapaho
 	src/arapaho.cpp
+	# cpp wrapper from https://github.com/turkishviking/darknet/tree/master/arapaho
+	src/yolopp.cpp
+
 	# examples/art.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
 	# examples/captcha.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
 	# examples/cifar.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
