@@ -1,3 +1,0 @@
-/home/charlie/Documents/Two-i/darknet_pj/release/CMakeFiles/rebuild_cache.dir
-/home/charlie/Documents/Two-i/darknet_pj/release/CMakeFiles/darknet-cpp.dir
-/home/charlie/Documents/Two-i/darknet_pj/release/CMakeFiles/edit_cache.dir

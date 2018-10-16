@@ -1,3 +1,0 @@
-/home/charlie/Documents/Two-i/darknet_pj/build-arapaho-Desktop_gcc7-Default/CMakeFiles/rebuild_cache.dir
-/home/charlie/Documents/Two-i/darknet_pj/build-arapaho-Desktop_gcc7-Default/CMakeFiles/arapaho.dir
-/home/charlie/Documents/Two-i/darknet_pj/build-arapaho-Desktop_gcc7-Default/CMakeFiles/edit_cache.dir
