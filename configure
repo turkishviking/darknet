@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+BUILD_DIR="_build"
+BUILD_SHARED="ON"
+USE_GPU="ON"
+USE_CUDNN="ON"
+USE_OPENCV="ON"
+# @todo would be nice to have a command line option to enable SHARED
+#       but that would require some work on the option parsing
+COMMAND="cmake . -B"$BUILD_DIR" -DBUILD_SHARED_LIBS=$BUILD_SHARED -DUSE_GPU=$USE_GPU -DUSE_CUDNN=$USE_CUDNN -DUSE_OPENCV=$USE_OPENCV"
+echo "Calling: $COMMAND"
+$COMMAND
