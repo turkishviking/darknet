@@ -1,29 +1,163 @@
 cmake_minimum_required(VERSION 3.5)
 set(CMAKE_CXX_STANDARD 11)
-project(darknet)
-set(LIBNAME ${PROJECT_NAME}-cpp)
+project(darknet-cpp)
 
-option(BUILD_SHARED_LIBS "Build a shared library" TRUE)
-option(USE_GPU "Use GPU support" TRUE)
-option(USE_CUDNN "Use cuDNN support" TRUE)
+option(BUILD_SHARED "Build a shared library" TRUE)
+option(BUILD_TESTING "Build tests" FALSE)
+option(USE_GPU "Use GPU support" FALSE)
+option(USE_CUDNN "Use cuDNN support" FALSE)
 # option(INSTALL_SOURCE_HEADERS "Install header files from the src directory" FALSE)
 
 ##
 # Let the user know what options are selected
 ##
-message("")
-message("Options summary")
-message("---------------")
-message(" - Build shared library ... ${BUILD_SHARED_LIBS}")
-message(" - GPU support............. ${USE_GPU}")
-message(" - cuDNN support........... ${USE_CUDNN}")
+message(STATUS "Configure GPU support ${USE_GPU}")
+message(STATUS "Configure cuDNN support ${USE_CUDNN}")
+if(BUILD_SHARED)
+	message(STATUS "Configure as a shared library")
+else()
+	message(STATUS "Configure as a static library")
+endif()
+if(BUILD_SHARED)
+	message(STATUS "Configure tests")
+endif()
 # message(" - Install headers ........ ${INSTALL_SOURCE_HEADERS}")
-message("")
 
 ##
-# Darknet lib sources
+# GPU support (depends on CUDA)
 ##
-set(darknet_src
+# That part might be rewritten using a Cuda target
+if(USE_GPU)
+	find_package(CUDA REQUIRED)
+
+	# ##
+	# # Uncoment to output paths to cuda libraries (returned by find_package)
+	# ##
+	# message("CUDA_CUDA_LIBRARY: ${CUDA_CUDA_LIBRARY}")
+	# message("CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
+	# message("CUDA_CUBLAS_LIBRARIES: ${CUDA_CUBLAS_LIBRARIES}")
+	# message("CUDA_curand_LIBRARY: ${CUDA_curand_LIBRARY}")
+	# message("CUDA_TOOLKIT_ROOT_DIR: ${CUDA_TOOLKIT_ROOT_DIR}")
+	# message("")
+
+	SET(CUDA_PROPAGATE_HOST_FLAGS OFF)
+	CUDA_INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+
+	## Manually set the path to Cuda library if find_package could find it
+	if(NOT CUDA_CUDA_LIBRARY)
+		SET(CUDA_CUDA_LIBRARY "/usr/local/cuda/targets/x86_64-linux/lib/stubs/libcuda.so")
+		message(STATUS "Cuda library path is not set, setting to ${CUDA_CUDA_LIBRARY}")
+	endif()
+
+	## List of nvcc compile flags
+	list(APPEND CUDA_NVCC_FLAGS
+		-gencode arch=compute_30,code=sm_30
+		-gencode arch=compute_35,code=sm_35
+		-gencode arch=compute_50,code=[sm_50,compute_50]
+		-gencode arch=compute_52,code=[sm_52,compute_52]
+		-Xcompiler
+		-fPIC
+		-DGPU
+	)
+	if(USE_CUDNN)
+		list(APPEND CUDA_NVCC_FLAGS -DCUDNN)
+	endif()
+
+	## Cuda compilation
+	## Uncoment to get verbose output
+	# set(CUDA_VERBOSE_BUILD ON)
+	CUDA_COMPILE(CUDA_SRC
+		src/convolutional_kernels.cu
+		src/deconvolutional_kernels.cu
+		src/activation_kernels.cu
+		src/im2col_kernels.cu
+		src/col2im_kernels.cu
+		src/blas_kernels.cu
+		src/crop_layer_kernels.cu
+		src/dropout_layer_kernels.cu
+		src/maxpool_layer_kernels.cu
+		src/avgpool_layer_kernels.cu
+		# src/softmax_layer_kernels.cu # @todo is this important ? Raises compilation errors
+	)
+
+	## List cuda libs to link darknet to
+	list(APPEND DARKNET_LINKED_LIBS
+		${CUDA_CUDA_LIBRARY}
+		${CUDA_LIBRARIES}
+		${CUDA_CUBLAS_LIBRARIES}
+		${CUDA_curand_LIBRARY}
+	)
+endif()
+
+##
+# CUDNN support, (depends on GPU support)
+##
+if(USE_CUDNN)
+	if(NOT USE_GPU)
+		message(FATAL_ERROR "cuDNN support requires GPU support")
+	endif()
+
+	find_library(CUDNN_LIBRARIES
+		NAMES cudnn libcudnn
+		HINTS ${CUDA_TOOLKIT_ROOT_DIR}
+		${CUDNN_TOOLKIT_ROOT_DIR}
+		PATH_SUFFIXES lib lib64 lib/x64 lib/x86 targets/aarch64-linux
+	)
+
+	if(NOT CUDNN_LIBRARIES)
+		# Set this if cuda and cudnn are in seperate locations
+		set(CUDNN_TOOLKIT_ROOT_DIR "" CACHE PATH "cuDNN root folder")
+		message(FATAL_ERROR "Unable to find cuDNN libraries, please ensure \
+			CUDA_TOOLKIT_ROOT_DIR has cuDNN or the CUDNN_TOOLKIT_ROOT_DIR variable is \
+			properly set or set CUDNN_LIBRARIES")
+	endif()
+
+	if(CUDNN_TOOLKIT_ROOT_DIR)
+		include_directories(SYSTEM ${CUDNN_TOOLKIT_ROOT_DIR}/include)
+	endif()
+
+	## List CUDNN libs to link darknet to
+	list(APPEND DARKNET_LINKED_LIBS ${CUDNN_LIBRARIES})
+endif()
+
+##
+# OpenCV dependency
+##
+# available modules:
+# 	opencv_aruco               opencv_bgsegm
+# 	opencv_bioinspired         opencv_calib3d       opencv_ccalib
+# 	opencv_core                opencv_datasets      opencv_dpm
+# 	opencv_face                opencv_features2d    opencv_flann
+# 	opencv_freetype            opencv_fuzzy         opencv_hdf
+# 	opencv_hfs                 opencv_highgui       opencv_img_hash
+# 	opencv_imgcodecs           opencv_imgproc       opencv_line_descriptor
+# 	opencv_ml                  opencv_objdetect     opencv_optflow
+# 	opencv_phase_unwrapping    opencv_photo         opencv_plot
+# 	opencv_reg                 opencv_rgbd          opencv_saliency
+# 	opencv_shape               opencv_stereo        opencv_stitching
+# 	opencv_structured_light    opencv_superres      opencv_surface_matching
+# 	opencv_tracking            opencv_video         opencv_videoio                                 opencv_videostab
+# 	opencv_ximgproc            opencv_xobjdetect    opencv_xphoto
+find_package(OpenCV
+	REQUIRED
+		core
+		highgui
+	OPTIONAL_COMPONENTS
+		imgproc
+		videoio
+		imgcodecs
+)
+# If the module is found then OPENCV_<MODULE>_FOUND is set to TRUE.
+# if(OpenCV_VERSION_MAJOR GREATER 2)
+# find_package(OpenCV REQUIRED imgproc videoio imgcodecs)
+# endif()
+
+##
+# Build the lib
+##
+# @WARNING markand@freenode/#cmake reported that genex can cause problems in exported targets
+#          in case of doubt replace genex with classic if()endif()
+add_library(${PROJECT_NAME}
 	src/activation_layer.c
 	src/activations.c
 	src/avgpool_layer.c
@@ -72,7 +206,6 @@ set(darknet_src
 	src/arapaho.cpp
 	# cpp wrapper from https://github.com/turkishviking/darknet/tree/master/arapaho
 	src/yolopp.cpp
-
 	# examples/art.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
 	# examples/captcha.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
 	# examples/cifar.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
@@ -88,136 +221,11 @@ set(darknet_src
 	# examples/super.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
 	# examples/tag.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
 	# examples/yolo.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-)
-
-##
-# Darknet lib CUDA sources
-##
-set(darknet_cuda_src
-	src/convolutional_kernels.cu
-	src/deconvolutional_kernels.cu
-	src/activation_kernels.cu
-	src/im2col_kernels.cu
-	src/col2im_kernels.cu
-	src/blas_kernels.cu
-	src/crop_layer_kernels.cu
-	src/dropout_layer_kernels.cu
-	src/maxpool_layer_kernels.cu
-	src/avgpool_layer_kernels.cu
-	# src/softmax_layer_kernels.cu # @todo is this important ? Raises compilation errors
-)
-
-##
-# GPU support (depends on CUDA)
-##
-if(USE_GPU)
-	find_package(CUDA REQUIRED)
-
-	# ##
-	# # Uncoment to output paths to cuda libraries (returned by find_package)
-	# ##
-	# message("CUDA_CUDA_LIBRARY: ${CUDA_CUDA_LIBRARY}")
-	# message("CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
-	# message("CUDA_CUBLAS_LIBRARIES: ${CUDA_CUBLAS_LIBRARIES}")
-	# message("CUDA_curand_LIBRARY: ${CUDA_curand_LIBRARY}")
-	# message("CUDA_TOOLKIT_ROOT_DIR: ${CUDA_TOOLKIT_ROOT_DIR}")
-	# message("")
-
-	SET(CUDA_PROPAGATE_HOST_FLAGS OFF)
-	CUDA_INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
-
-	## Manually set the path to Cuda library if find_package could find it
-	if(NOT CUDA_CUDA_LIBRARY)
-		SET(CUDA_CUDA_LIBRARY "/usr/local/cuda/targets/x86_64-linux/lib/stubs/libcuda.so")
-		message(STATUS "Cuda library path is not set, setting to ${CUDA_CUDA_LIBRARY}")
-	endif()
-
-	## List of nvcc compile flags
-	list(APPEND CUDA_NVCC_FLAGS
-		-gencode arch=compute_30,code=sm_30
-		-gencode arch=compute_35,code=sm_35
-		-gencode arch=compute_50,code=[sm_50,compute_50]
-		-gencode arch=compute_52,code=[sm_52,compute_52]
-		-Xcompiler
-		-fPIC
-		-DGPU
-	)
-	if(USE_CUDNN)
-		list(APPEND CUDA_NVCC_FLAGS -DCUDNN)
-	endif()
-
-	## Cuda compilation
-	## Uncoment to get verbose output
-	# set(CUDA_VERBOSE_BUILD ON)
-	CUDA_COMPILE(CUDA_SRC ${darknet_cuda_src})
-
-	## List cuda libs to link darknet to
-	list(APPEND DARKNET_LINKED_LIBS
-		${CUDA_CUDA_LIBRARY}
-		${CUDA_LIBRARIES}
-		${CUDA_CUBLAS_LIBRARIES}
-		${CUDA_curand_LIBRARY}
-	)
-endif()
-
-##
-# CUDNN support, (depends on GPU support)
-##
-if(USE_CUDNN)
-	if(NOT USE_GPU)
-		message(FATAL_ERROR "cuDNN support requires GPU support")
-	endif()
-
-	find_library(CUDNN_LIBRARIES
-		NAMES cudnn libcudnn
-		HINTS ${CUDA_TOOLKIT_ROOT_DIR}
-		${CUDNN_TOOLKIT_ROOT_DIR}
-		PATH_SUFFIXES lib lib64 lib/x64 lib/x86 targets/aarch64-linux
-	)
-
-	if(NOT CUDNN_LIBRARIES)
-		# Set this if cuda and cudnn are in seperate locations
-		set(CUDNN_TOOLKIT_ROOT_DIR "" CACHE PATH "cuDNN root folder")
-		message(FATAL_ERROR "Unable to find cuDNN libraries, please ensure \
-			CUDA_TOOLKIT_ROOT_DIR has cuDNN or the CUDNN_TOOLKIT_ROOT_DIR variable is \
-			properly set or set CUDNN_LIBRARIES")
-	endif()
-
-	if(CUDNN_TOOLKIT_ROOT_DIR)
-		include_directories(SYSTEM ${CUDNN_TOOLKIT_ROOT_DIR}/include)
-	endif()
-
-	## List CUDNN libs to link darknet to
-	list(APPEND DARKNET_LINKED_LIBS ${CUDNN_LIBRARIES})
-endif()
-
-##
-# OpenCV dependency
-##
-find_package(OpenCV REQUIRED)
-## List OpenCV libs to link darknet to (NOT SURE IT's needed buuuuuut...
-## let's keep comment and delete that later)
-# list(APPEND DARKNET_LINKED_LIBS opencv_core opencv_highgui opencv_imgproc)
-# if(OpenCV_VERSION_MAJOR GREATER 2)
-	# list(APPEND DARKNET_LINKED_LIBS opencv_videoio opencv_imgcodecs)
-# endif()
-
-##
-# Build the lib
-##
-# @WARNING markand@freenode/#cmake reported that genex can cause problems in exported targets
-#          in case of doubt replace genex with classic if()endif()
-add_library(${LIBNAME}
-	${darknet_src}
 	$<$<BOOL:${USE_GPU}>:${CUDA_SRC}>
-	# ${headers} # maybe needed to allow autocomletion in some IDE?
-	# ${darknet_cuda_src}  # maybe needed to allow autocomletion in some IDE?
 )
-
-# Add -Ofast for compilation
 
 ## Set compile options
-target_compile_options(${LIBNAME} PRIVATE
+target_compile_options(${PROJECT_NAME} PRIVATE
 	-Wall
 	-Wfatal-errors
 	-Wno-unknown-pragmas
@@ -228,12 +236,13 @@ target_compile_options(${LIBNAME} PRIVATE
 	# Needed on Cygwin + OpenCV-3.4.1 + Intel Core i5 3570
 	# see https://github.com/leggedrobotics/darknet_ros/issues/1#issuecomment-298329957
 	-O4 # max optimiszation
+	# -g # Add debug symbol
 	# -Og # Optimize debugging experience
-	# -g # ??????? no idea =)
+	# Add -Ofast for compilation ?
 )
 
 ## Set compile definitions
-target_compile_definitions(${LIBNAME}
+target_compile_definitions(${PROJECT_NAME}
 	PRIVATE
 		# no need to add -D in front of the definitions
 		OPENCV
@@ -242,36 +251,38 @@ target_compile_definitions(${LIBNAME}
 		$<$<BOOL:${USE_CUDNN}>:CUDNN>
 )
 ## Set include directories
-target_include_directories(${LIBNAME}
+target_include_directories(${PROJECT_NAME}
 	PRIVATE src
 	PRIVATE $<$<BOOL:${USE_GPU}>:${CUDA_TOOLKIT_ROOT_DIR}/include>
 	PUBLIC include
 )
-target_include_directories(${LIBNAME} SYSTEM
-	PRIVATE ${OpenCV_INCLUDE_DIRS}
-)
+# target_include_directories(${PROJECT_NAME} SYSTEM
+# 	PRIVATE ${OpenCV_INCLUDE_DIRS}
+# )
 
 ## link libraries
-target_link_libraries(${LIBNAME}
-	PRIVATE ${CMAKE_THREAD_LIBS_INIT}
-  	PRIVATE ${DARKNET_LINKED_LIBS}
-  	PRIVATE ${OpenCV_LIBS}
-	PRIVATE m
+target_link_libraries(${PROJECT_NAME}
+	PRIVATE
+		m
+		${CMAKE_THREAD_LIBS_INIT}
+		${DARKNET_LINKED_LIBS}
+	PUBLIC
+		${OpenCV_LIBS}
 )
 
-# configure the package description file.
-# configure_file(DarknetConfig.cmake.in
-# 	${CMAKE_BINARY_DIR}/DarknetConfig.cmake @ONLY)
-# install(FILES ${CMAKE_BINARY_DIR}/DarknetConfig.cmake
-# 	DESTINATION "CMake")
+if(BUILD_TESTING)
+	enable_testing()
+	add_subdirectory(test)
+endif()
 
-# set_target_properties(darknet_lib
-# 	PROPERTIES
-# 	ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-# 	LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-# 	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-# )
-# install(TARGETS darknet_lib
+set_target_properties(${PROJECT_NAME}
+	PROPERTIES
+	ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+	LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
+# install(TARGETS ${PROJECT_NAME}
 # 	ARCHIVE DESTINATION lib
 # 	LIBRARY DESTINATION lib
 # 	RUNTIME DESTINATION bin
@@ -285,32 +296,38 @@ target_link_libraries(${LIBNAME}
 # endif()
 
 ##
-# What was the Makfile doing:
+# Below is an attempt to look at what was the original Makfile doing
 ##
-## compile C line
+
+# compile C line
 # g++ -Iinclude/ -Isrc/ -DOPENCV `pkg-config --cflags opencv`  -DGPU -I/usr/local/cuda/include/ -DCUDNN  -Wno-write-strings -std=c++0x -Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC -Ofast -DOPENCV -DGPU -DCUDNN -fPIC -c ./examples/segmenter.c -o obj-cpp-shared/segmenter.o
-# compile flags
-# g++
-# 	-DOPENCV
-# 	-DGPU
-# 	-DCUDNN
+# compile C flags
+	## ??
+		# -std=c++0x
+		# -fPIC
+		# -Ofast
 
-# 	-Isrc/
-# 	-Iinclude/
-# 	-I/usr/local/cuda/include/
-# 	`pkg-config --cflags opencv`
+	## definition for Darknet
+		# -DOPENCV
+		# -DGPU
+		# -DCUDNN
 
-# 	-std=c++0x
-# 	-Wall
-# 	-Wno-write-strings
-# 	-Wno-unused-result
-# 	-Wno-unknown-pragmas
-# 	-Wfatal-errors
-# 	-fPIC
-# 	-Ofast
+	## include dirs
+		# -Isrc/
+		# -Iinclude/
+		# -I/usr/local/cuda/include/
+		# `pkg-config --cflags opencv`
 
-# cuda compile
-# nvcc -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -gencode arch=compute_50,code=[sm_50,compute_50] -gencode arch=compute_52,code=[sm_52,compute_52] -Iinclude/ -Isrc/ -DOPENCV `pkg-config --cflags opencv`  -DGPU -I/usr/local/cuda/include/ -DCUDNN  --compiler-options "-Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC -Ofast -DOPENCV -DGPU -DCUDNN -fPIC" -c ./src/convolutional_kernels.cu -o obj-cpp-shared/convolutional_kernels.o
+	## warnings control
+		# -Wall
+		# -Wno-write-strings
+		# -Wno-unused-result
+		# -Wno-unknown-pragmas
+		# -Wfatal-errors
+
+# cuda compile line
+	# nvcc -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -gencode arch=compute_50,code=[sm_50,compute_50] -gencode arch=compute_52,code=[sm_52,compute_52] -Iinclude/ -Isrc/ -DOPENCV `pkg-config --cflags opencv`  -DGPU -I/usr/local/cuda/include/ -DCUDNN  --compiler-options "-Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC -Ofast -DOPENCV -DGPU -DCUDNN -fPIC" -c ./src/convolutional_kernels.cu -o obj-cpp-shared/convolutional_kernels.o
+
 # cuda compile flags
 	## gencode, cuda related
 		# -gencode arch=compute_30,code=sm_30
@@ -324,45 +341,46 @@ target_link_libraries(${LIBNAME}
 		# `pkg-config --cflags opencv`
 		# -I/usr/local/cuda/include/
 
-	## Darknet flags ?
-	# 	-DOPENCV
-	# 	-DGPU
-	# 	-DCUDNN
-	# --compiler-options "-Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC -Ofast -DOPENCV -DGPU -DCUDNN -fPIC"
+	## Darknet flags
+		# -DOPENCV
+		# -DGPU
+		# -DCUDNN
+	# --compiler-options
+	# "-Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC -Ofast -DOPENCV -DGPU -DCUDNN -fPIC"
 
 ## link all
 # g++ -Iinclude/ -Isrc/ -DOPENCV `pkg-config --cflags opencv`  -DGPU -I/usr/local/cuda/include/ -DCUDNN  -Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC -Ofast -DOPENCV -DGPU -DCUDNN ./obj-cpp-shared/segmenter.o ./obj-cpp-shared/upsample_layer.o ./obj-cpp-shared/l2norm_layer.o ./obj-cpp-shared/logistic_layer.o ./obj-cpp-shared/lstm_layer.o ./obj-cpp-shared/gemm.o ./obj-cpp-shared/utils.o ./obj-cpp-shared/cuda.o ./obj-cpp-shared/deconvolutional_layer.o ./obj-cpp-shared/convolutional_layer.o ./obj-cpp-shared/list.o ./obj-cpp-shared/image.o ./obj-cpp-shared/activations.o ./obj-cpp-shared/im2col.o ./obj-cpp-shared/col2im.o ./obj-cpp-shared/blas.o ./obj-cpp-shared/crop_layer.o ./obj-cpp-shared/dropout_layer.o ./obj-cpp-shared/maxpool_layer.o ./obj-cpp-shared/softmax_layer.o ./obj-cpp-shared/data.o ./obj-cpp-shared/matrix.o ./obj-cpp-shared/network.o ./obj-cpp-shared/connected_layer.o ./obj-cpp-shared/cost_layer.o ./obj-cpp-shared/parser.o ./obj-cpp-shared/option_list.o ./obj-cpp-shared/detection_layer.o ./obj-cpp-shared/captcha.o ./obj-cpp-shared/route_layer.o ./obj-cpp-shared/box.o ./obj-cpp-shared/nightmare.o ./obj-cpp-shared/normalization_layer.o ./obj-cpp-shared/avgpool_layer.o ./obj-cpp-shared/coco.o ./obj-cpp-shared/yolo.o ./obj-cpp-shared/detector.o ./obj-cpp-shared/layer.o ./obj-cpp-shared/regressor.o ./obj-cpp-shared/classifier.o ./obj-cpp-shared/local_layer.o ./obj-cpp-shared/shortcut_layer.o ./obj-cpp-shared/activation_layer.o ./obj-cpp-shared/rnn_layer.o ./obj-cpp-shared/gru_layer.o ./obj-cpp-shared/rnn.o ./obj-cpp-shared/crnn_layer.o ./obj-cpp-shared/demo.o ./obj-cpp-shared/tag.o ./obj-cpp-shared/cifar.o ./obj-cpp-shared/go.o ./obj-cpp-shared/batchnorm_layer.o ./obj-cpp-shared/art.o ./obj-cpp-shared/region_layer.o ./obj-cpp-shared/reorg_layer.o ./obj-cpp-shared/lsd.o ./obj-cpp-shared/super.o ./obj-cpp-shared/tree.o ./obj-cpp-shared/yolo_layer.o ./obj-cpp-shared/convolutional_kernels.o ./obj-cpp-shared/deconvolutional_kernels.o ./obj-cpp-shared/activation_kernels.o ./obj-cpp-shared/im2col_kernels.o ./obj-cpp-shared/col2im_kernels.o ./obj-cpp-shared/blas_kernels.o ./obj-cpp-shared/crop_layer_kernels.o ./obj-cpp-shared/dropout_layer_kernels.o ./obj-cpp-shared/maxpool_layer_kernels.o ./obj-cpp-shared/avgpool_layer_kernels.o -o libdarknet-cpp-shared.so -lm -pthread  `pkg-config --libs opencv`  -L./3rdparty -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand -lcudnn -lstdc++  -shared
+#
 # linking flags
-# g++
-# 	-DOPENCV
-# 	-DGPU
-# 	-DCUDNN
+	## darknet flags
+	# -DOPENCV
+	# -DGPU
+	# -DCUDNN
 
-# 	-Isrc/
-# 	-Iinclude/
-# 	-I/usr/local/cuda/include/
-# 	`pkg-config --libs opencv`
-# 	`pkg-config --cflags opencv`
+	## include dirs
+		# -Isrc/
+		# -Iinclude/
+		# -I/usr/local/cuda/include/
+		# `pkg-config --libs opencv`
+		# `pkg-config --cflags opencv`
 
-# 	-Wall
-# 	-Wno-unused-result
-# 	-Wno-unknown-pragmas
-# 	-Wfatal-errors
-# 	-fPIC
-# 	-Ofast
-# 	-DOPENCV
-# 	-DGPU
-# 	-DCUDNN
+	##warning control
+		# -Wall
+		# -Wno-unused-result
+		# -Wno-unknown-pragmas
+		# -Wfatal-errors
+		# -fPIC
+		# -Ofast
 
-# 	-pthread
-# 	-lm
-
-# 	-L./3rdparty
-# 	-L/usr/local/cuda/lib64
-# 	-lcuda
-# 	-lcudart
-# 	-lcublas
-# 	-lcurand
-# 	-lcudnn
-# 	-lstdc++
-# 	-shared
+	## ??
+		# -pthread
+		# -lm
+		# -L./3rdparty
+		# -L/usr/local/cuda/lib64
+		# -lcuda
+		# -lcudart
+		# -lcublas
+		# -lcurand
+		# -lcudnn
+		# -lstdc++
+		# -shared
