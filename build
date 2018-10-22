@@ -17,6 +17,6 @@ COMMAND="cmake --build "$BUILD_DIR" "$CLEAN_OPT" -- -j"$(nproc)""
 echo "Calling: $COMMAND"
 $COMMAND
 
-# if test $_; then
-	# cmake --build "$BUILD_DIR" --target test
-# fi
+if test $_; then
+	CTEST_OUTPUT_ON_FAILURE=1 cmake --build "$BUILD_DIR" --target test
+fi
