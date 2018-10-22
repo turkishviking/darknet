@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
         path = path + '/';
 
     // files used to configure the network
+    string data = path + "coco.data";
     string cfg = path + "yolov3-tiny.cfg";
     string weights = path + "yolov3-tiny.weights";
 
