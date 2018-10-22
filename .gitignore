@@ -1,3 +1,6 @@
+/test/test_data/yolov3-tiny.cfg
+/test/test_data/yolov3-tiny.weights
+
 .fuse*
 *.o
 *.dSYM
