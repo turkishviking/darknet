@@ -23,7 +23,7 @@ class Yolopp
 public:
     Yolopp();
     ~Yolopp();
-    void load(std::string data, std::string cfg, std::string weights);
+    bool load(std::string data, std::string cfg, std::string weights);
     std::vector<yoloDetections> detect(cv::Mat &inputImage, float &&threshold, float &&hierThreshold);
 private:
     ArapahoV2* arap;
