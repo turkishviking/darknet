@@ -33,6 +33,7 @@ if(USE_GPU)
 	# ##
 	# # Uncoment to output paths to cuda libraries (returned by find_package)
 	# ##
+	# message("")
 	# message("CUDA_CUDA_LIBRARY: ${CUDA_CUDA_LIBRARY}")
 	# message("CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
 	# message("CUDA_CUBLAS_LIBRARIES: ${CUDA_CUBLAS_LIBRARIES}")
@@ -44,10 +45,11 @@ if(USE_GPU)
 	CUDA_INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 
 	## Manually set the path to Cuda library if find_package could find it
-	if(NOT CUDA_CUDA_LIBRARY)
-		SET(CUDA_CUDA_LIBRARY "/usr/local/cuda/targets/x86_64-linux/lib/stubs/libcuda.so")
-		message(STATUS "Cuda library path is not set, setting to ${CUDA_CUDA_LIBRARY}")
-	endif()
+	## May not be needed anymore if we don't link to it !
+	# if(NOT CUDA_CUDA_LIBRARY)
+	# 	SET(CUDA_CUDA_LIBRARY "/usr/local/cuda/targets/x86_64-linux/lib/stubs/libcuda.so")
+	# 	message(STATUS "Cuda library path is not set, setting to ${CUDA_CUDA_LIBRARY}")
+	# endif()
 
 	## List of nvcc compile flags
 	list(APPEND CUDA_NVCC_FLAGS
@@ -79,14 +81,6 @@ if(USE_GPU)
 		src/avgpool_layer_kernels.cu
 		# src/softmax_layer_kernels.cu # @todo is this important ? Raises compilation errors
 	)
-
-	## List cuda libs to link darknet to
-	list(APPEND DARKNET_LINKED_LIBS
-		${CUDA_CUDA_LIBRARY}
-		${CUDA_LIBRARIES}
-		${CUDA_CUBLAS_LIBRARIES}
-		${CUDA_curand_LIBRARY}
-	)
 endif()
 
 ##
@@ -115,9 +109,6 @@ if(USE_CUDNN)
 	if(CUDNN_TOOLKIT_ROOT_DIR)
 		include_directories(SYSTEM ${CUDNN_TOOLKIT_ROOT_DIR}/include)
 	endif()
-
-	## List CUDNN libs to link darknet to
-	list(APPEND DARKNET_LINKED_LIBS ${CUDNN_LIBRARIES})
 endif()
 
 ##
@@ -201,22 +192,8 @@ add_library(${PROJECT_NAME}
 	src/arapaho.cpp
 	# cpp wrapper from https://github.com/turkishviking/darknet/tree/master/arapaho
 	src/yolopp.cpp
-	# examples/art.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/captcha.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/cifar.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/classifier.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/coco.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/detector.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/go.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/lsd.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/nightmare.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/regressor.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/rnn.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/segmenter.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/super.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/tag.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	# examples/yolo.c # @todo is this needed ? this is part of the examples, so I don't think it's needed in the lib
-	$<$<BOOL:${USE_GPU}>:${CUDA_SRC}>
+	# add cuda compile result (empty if USE_GPU is OFF
+	${CUDA_SRC}
 )
 
 ## Set compile options
@@ -257,12 +234,21 @@ target_include_directories(${PROJECT_NAME}
 
 ## link libraries
 target_link_libraries(${PROJECT_NAME}
+	PUBLIC
+		${OpenCV_LIBS}
 	PRIVATE
 		m
 		${CMAKE_THREAD_LIBS_INIT}
-		${DARKNET_LINKED_LIBS}
-	PUBLIC
-		${OpenCV_LIBS}
+		#
+		# only when USE_GPU is ON
+		${CUDA_LIBRARIES}
+		${CUDA_CUBLAS_LIBRARIES}
+		${CUDA_curand_LIBRARY}
+		# looks like we don't need this  anymore ?
+		# ${CUDA_CUDA_LIBRARY}
+		#
+		# only when USE_CUDNN is ON
+		${CUDNN_LIBRARIES}
 )
 
 if(BUILD_TESTING)
