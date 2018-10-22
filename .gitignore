@@ -1,24 +1,10 @@
+.fuse*
 *.o
 *.dSYM
 *.csv
 *.out
-*.png
-*.jpg
 *.pyc
 _build/
-old/
-mnist/
-data/
-caffe/
-grasp/
-images/
-opencv/
-convnet/
-decaf/
-submission/
-cfg/
-darknet
-.fuse*
 
 # OS Generated #
 .DS_Store*
