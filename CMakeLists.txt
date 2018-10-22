@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 11)
 project(darknet-cpp)
 
 option(BUILD_SHARED "Build a shared library" TRUE)
-option(BUILD_TESTING "Build tests" FALSE)
+option(BUILD_TESTING "Create tests using CMake" FALSE)
 option(USE_GPU "Use GPU support" FALSE)
 option(USE_CUDNN "Use cuDNN support" FALSE)
 # option(INSTALL_SOURCE_HEADERS "Install header files from the src directory" FALSE)
