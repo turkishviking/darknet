@@ -5,12 +5,12 @@ if ! test "$BUILD_DIR"; then
     echo "export BUILD_DIR=\"_build\""
   exit 1
 fi
-BUILD_SHARED="ON"
+BUILD_SHARED_LIBS="ON"
 BUILD_TESTING="ON"
-USE_GPU="ON"
-USE_CUDNN="ON"
+USE_GPU="OFF"
+USE_CUDNN="OFF"
 # @todo would be nice to have command line options to enable the compile options
 #       easily but that would require some work on the option parsing
-COMMAND="cmake . -B"$BUILD_DIR" -DBUILD_SHARED=$BUILD_SHARED -DBUILD_TESTING=$BUILD_TESTING -DUSE_GPU=$USE_GPU -DUSE_CUDNN=$USE_CUDNN"
+COMMAND="cmake . -B"$BUILD_DIR" -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS -DBUILD_TESTING=$BUILD_TESTING -DUSE_GPU=$USE_GPU -DUSE_CUDNN=$USE_CUDNN"
 echo "Calling: $COMMAND"
 $COMMAND
