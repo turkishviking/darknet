@@ -1,8 +1,10 @@
+# Have a look to that excellent answer on SO:
+# https://stackoverflow.com/questions/17511496/how-to-create-a-shared-library-with-cmake
 cmake_minimum_required(VERSION 3.5)
 set(CMAKE_CXX_STANDARD 11)
-project(darknet-cpp)
+project(darknet-cpp VERSION 0.0.1)
 
-option(BUILD_SHARED "Build a shared library" TRUE)
+option(BUILD_SHARED_LIBS "Build a shared library" TRUE)
 option(BUILD_TESTING "Create tests using CMake" FALSE)
 option(USE_GPU "Use GPU support" FALSE)
 option(USE_CUDNN "Use cuDNN support" FALSE)
@@ -13,12 +15,12 @@ option(USE_CUDNN "Use cuDNN support" FALSE)
 ##
 message(STATUS "Configure GPU support ${USE_GPU}")
 message(STATUS "Configure cuDNN support ${USE_CUDNN}")
-if(BUILD_SHARED)
+if(BUILD_SHARED_LIBS)
 	message(STATUS "Configure as a shared library")
 else()
 	message(STATUS "Configure as a static library")
 endif()
-if(BUILD_SHARED)
+if(BUILD_SHARED_LIBS)
 	message(STATUS "Configure tests")
 endif()
 # message(" - Install headers ........ ${INSTALL_SOURCE_HEADERS}")
