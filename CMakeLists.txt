@@ -241,11 +241,11 @@ target_link_libraries(${PROJECT_NAME}
 		${CMAKE_THREAD_LIBS_INIT}
 		#
 		# only when USE_GPU is ON
-		${CUDA_LIBRARIES}
-		${CUDA_CUBLAS_LIBRARIES}
-		${CUDA_curand_LIBRARY}
+		$<$<BOOL:${USE_GPU}>:${CUDA_LIBRARIES}>
+		$<$<BOOL:${USE_GPU}>:${CUDA_CUBLAS_LIBRARIES}>
+		$<$<BOOL:${USE_GPU}>:${CUDA_curand_LIBRARY}>
 		# looks like we don't need this  anymore ?
-		# ${CUDA_CUDA_LIBRARY}
+		# $<$<BOOL:${USE_GPU}>:${CUDA_CUDA_LIBRARY}>
 		#
 		# only when USE_CUDNN is ON
 		${CUDNN_LIBRARIES}
