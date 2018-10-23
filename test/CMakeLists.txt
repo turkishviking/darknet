@@ -8,7 +8,19 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE darknet-cpp
 )
-add_test(test_darknet-cpp darknet-cpp-test "${CMAKE_CURRENT_SOURCE_DIR}/test_data/")
+set_target_properties(${PROJECT_NAME}
+	PROPERTIES
+	ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+	LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
+add_test(
+	NAME
+		test_darknet-cpp
+	COMMAND
+		darknet-cpp-test "${CMAKE_CURRENT_SOURCE_DIR}/test_data/"
+)
 
 # Make sure yolov3-tiny.weights is present in the test folder or download it
 SET(WEIGTHS_FILE "yolov3-tiny.weights")
