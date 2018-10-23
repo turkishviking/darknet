@@ -8,7 +8,7 @@ fi
 BUILD_SHARED="ON"
 BUILD_TESTING="ON"
 USE_GPU="ON"
-USE_CUDNN="OFF"
+USE_CUDNN="ON"
 # @todo would be nice to have command line options to enable the compile options
 #       easily but that would require some work on the option parsing
 COMMAND="cmake . -B"$BUILD_DIR" -DBUILD_SHARED=$BUILD_SHARED -DBUILD_TESTING=$BUILD_TESTING -DUSE_GPU=$USE_GPU -DUSE_CUDNN=$USE_CUDNN"
