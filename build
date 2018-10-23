@@ -1,5 +1,11 @@
 #!/usr/bin/env sh
-BUILD_DIR="_build"
+if ! test "$BUILD_DIR"; then
+  echo "You need to set the BUILD_DIR variable to use this script."
+  echo
+    echo "export BUILD_DIR=\"_build\""
+  exit 1
+fi
+
 CLEAN_OPT=""
 if test $1; then
 	if test $1 = "-c"; then

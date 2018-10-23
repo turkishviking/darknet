@@ -1,8 +1,13 @@
 #!/usr/bin/env sh
-BUILD_DIR="_build"
+if ! test "$BUILD_DIR"; then
+  echo "You need to set the BUILD_DIR variable to use this script."
+  echo
+    echo "export BUILD_DIR=\"_build\""
+  exit 1
+fi
 BUILD_SHARED="ON"
 BUILD_TESTING="ON"
-USE_GPU="OFF"
+USE_GPU="ON"
 USE_CUDNN="OFF"
 # @todo would be nice to have command line options to enable the compile options
 #       easily but that would require some work on the option parsing
