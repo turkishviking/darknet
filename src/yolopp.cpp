@@ -1,4 +1,6 @@
 #include "yolopp.h"
+#include "arapaho.hpp"
+
 
 Yolopp::Yolopp()
 {
@@ -13,7 +15,7 @@ bool Yolopp::fileExists(const char *file)
     return (0 == result);
 }
 
-void Yolopp::load(std::string data, std::string cfg, std::string weights)
+bool Yolopp::load(std::string data, std::string cfg, std::string weights)
 {
     if(arap)
         delete arap;
@@ -40,6 +42,7 @@ void Yolopp::load(std::string data, std::string cfg, std::string weights)
     {
         std::cout << fileExists(INPUT_DATA_FILE) << std::endl;
         EPRINTF("Setup failed as input files do not exist or not readable!\n");
+        return false;
     }
     ap.datacfg = INPUT_DATA_FILE;
     ap.cfgfile = INPUT_CFG_FILE;
@@ -55,13 +58,14 @@ void Yolopp::load(std::string data, std::string cfg, std::string weights)
         EPRINTF("Setup failed!\n");
         if(arap) delete arap;
         arap = 0;
+        return false;
     }
 
     boxes = 0;
-
+    return true;
 }
 
-std::vector<yoloDetections> Yolopp::detect(cv::Mat &inputImage, float &threshold, float &hierThreshold)
+std::vector<yoloDetections> Yolopp::detect(cv::Mat &inputImage, float &&threshold, float &&hierThreshold)
 {
     std::vector<yoloDetections> result;
 
@@ -73,8 +77,9 @@ std::vector<yoloDetections> Yolopp::detect(cv::Mat &inputImage, float &threshold
 
     int numObjects = 0;
 
-    arap->Detect(inputImage, threshold, hierThreshold, numObjects);
-
+    bool success = arap->Detect(inputImage, threshold, hierThreshold, numObjects);
+    if(!success)
+        throw std::string("Detection failed");
 
 
     if(numObjects > 0) // Realistic maximum

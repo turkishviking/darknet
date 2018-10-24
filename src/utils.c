@@ -320,7 +320,7 @@ void malloc_error()
 void file_error(char *s)
 {
     fprintf(stderr, "Couldn't open file: %s\n", s);
-    exit(0);
+    exit(666);
 }
 
 list *split_str(char *s, char delim)

@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+if ! test "$BUILD_DIR"; then
+  echo "You need to set the BUILD_DIR variable to use this script."
+  echo
+    echo "export BUILD_DIR=\"_build\""
+  exit 1
+fi
+
+CLEAN_OPT=""
+if test $1; then
+	if test $1 = "-c"; then
+		CLEAN_OPT="--clean-first"
+	else
+		echo "The only supported command line option is -c (clean before build)"
+	fi
+fi
+# @todo would be nice to have a command line option to enable verbose, or parallel processing
+#       but that would require some work on the option parsing
+COMMAND="cmake --build "$BUILD_DIR" "$CLEAN_OPT" -- -j"$(nproc)""
+# COMMAND="cmake --build "$BUILD_DIR" "$CLEAN_OPT" -- VERBOSE=1 -j"$(nproc)""
+# COMMAND="cmake --build "$BUILD_DIR" "$CLEAN_OPT" -- VERBOSE=1 -j1"
+# COMMAND="cmake --build "$BUILD_DIR" "$CLEAN_OPT" -- -j1"
+echo "Calling: $COMMAND"
+$COMMAND
+
+echo
+echo "To run the tests:"
+echo "CTEST_OUTPUT_ON_FAILURE=1 cmake --build \"$BUILD_DIR\" --target test"

@@ -1,23 +1,20 @@
+# testing dir created by ctest (cmake test tool)
+/Testing
+
+# static files needed to run the tests but downloaded at configure time
+/test/test_data/yolov3-tiny.cfg
+/test/test_data/yolov3-tiny.weights
+
+# recommended folder to build the project
+_build/
+
+# various usless files
+.fuse*
 *.o
 *.dSYM
 *.csv
 *.out
-*.png
-*.jpg
 *.pyc
-old/
-mnist/
-data/
-caffe/
-grasp/
-images/
-opencv/
-convnet/
-decaf/
-submission/
-cfg/
-darknet
-.fuse*
 
 # OS Generated #
 .DS_Store*
