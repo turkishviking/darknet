@@ -8,23 +8,28 @@
 #include <opencv2/opencv.hpp>
 #include <darknet.h>
 
-struct yoloDetections
+struct yoloDetection
 {
     std::string label;
     int x;
     int y;
     int width;
     int height;
+    float rx;
+    float ry;
+    float rw;
+    float rh;
+
 };
 class ArapahoV2;
 
-class Yolopp
+class Darknetpp
 {
 public:
-    Yolopp();
-    ~Yolopp();
+    Darknetpp();
+    ~Darknetpp();
     bool load(std::string data, std::string cfg, std::string weights);
-    std::vector<yoloDetections> detect(cv::Mat &inputImage, float &&threshold, float &&hierThreshold);
+    std::vector<yoloDetection> detect(cv::Mat &inputImage, float &&threshold, float &&hierThreshold);
 private:
     ArapahoV2* arap;
     bool fileExists(const char *file);
