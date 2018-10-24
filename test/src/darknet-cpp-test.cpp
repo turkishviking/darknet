@@ -1,4 +1,4 @@
-#include <yolopp.h>
+#include <darknetpp.h>
 #include <opencv2/opencv.hpp>
 using namespace std;
 
@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
     cout << " - " << data << endl;
     cout << endl;
 
-    Yolopp y;
+    Darknetpp y;
     bool loaded = y.load(data, cfg, weights);
     if (!loaded) 
         return 2;
@@ -43,8 +43,8 @@ int main(int argc, char* argv[])
     try 
     {
         cv::Mat img = cv::imread(imgfile);
-        vector<yoloDetections> v = y.detect(img, 0.45, 0.5);
-        for (yoloDetections det : v)
+        vector<yoloDetection> v = y.detect(img, 0.45, 0.5);
+        for (yoloDetection det : v)
             cout << det.label << " ";
         
         cout << endl;

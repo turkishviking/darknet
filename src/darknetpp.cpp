@@ -1,13 +1,13 @@
-#include "yolopp.h"
+#include "darknetpp.h"
 #include "arapaho.hpp"
 
 
-Yolopp::Yolopp()
+Darknetpp::Darknetpp()
 {
     arap = new ArapahoV2();
 }
 
-bool Yolopp::fileExists(const char *file)
+bool Darknetpp::fileExists(const char *file)
 {
     struct stat st;
     if(!file) return false;
@@ -15,19 +15,13 @@ bool Yolopp::fileExists(const char *file)
     return (0 == result);
 }
 
-bool Yolopp::load(std::string data, std::string cfg, std::string weights)
+bool Darknetpp::load(std::string data, std::string cfg, std::string weights)
 {
     if(arap)
         delete arap;
     arap = new ArapahoV2();
     bool ret = false;
     int expectedW = 0, expectedH = 0;
-
-    /*
-    std::string inDat = path + "/input.data";
-    std::string inCfg = path + "/input.cfg";
-    std::string inWght = path + "/input.weights";
-    */
 
     ArapahoV2Params ap;
 
@@ -65,9 +59,9 @@ bool Yolopp::load(std::string data, std::string cfg, std::string weights)
     return true;
 }
 
-std::vector<yoloDetections> Yolopp::detect(cv::Mat &inputImage, float &&threshold, float &&hierThreshold)
+std::vector<yoloDetection> Darknetpp::detect(cv::Mat &inputImage, float &&threshold, float &&hierThreshold)
 {
-    std::vector<yoloDetections> result;
+    std::vector<yoloDetection> result;
 
     int imageWidthPixels = 0, imageHeightPixels = 0;
     imageWidthPixels = inputImage.size().width;
@@ -117,17 +111,32 @@ std::vector<yoloDetections> Yolopp::detect(cv::Mat &inputImage, float &&threshol
             DPRINTF("Box #%d: center {x,y}, box {w,h} = [%f, %f, %f, %f]\n",
                     objId, boxes[objId].x, boxes[objId].y, boxes[objId].w, boxes[objId].h);
 
+            //prevent detection to go out images
+            if(leftTopX < 0)
+                leftTopX = 0;
+            if(leftTopY < 0)
+                leftTopY = 0;
+            if(inputImage.cols < rightBotX)
+                rightBotX = inputImage.cols;
+            if(inputImage.rows < rightBotY)
+                rightBotY = inputImage.rows;
+
             if (labels[objId].c_str())
             {
-                yoloDetections yoDet;
+                yoloDetection yoDet;
                 yoDet.label = labels[objId];
                 yoDet.x = leftTopX;
                 yoDet.y = leftTopY;
                 yoDet.width = rightBotX - leftTopX;
                 yoDet.height = rightBotY - leftTopY;
+                yoDet.rx = yoDet.x / (float)inputImage.cols;
+                yoDet.ry = yoDet.y / (float)inputImage.rows;
+                yoDet.rw = yoDet.width / (float)inputImage.cols;
+                yoDet.rh = yoDet.height / (float)inputImage.rows;
 
                 result.emplace_back(yoDet);
             }
+
         }
 
         if (boxes)
@@ -148,7 +157,7 @@ std::vector<yoloDetections> Yolopp::detect(cv::Mat &inputImage, float &&threshol
 }
 
 
-Yolopp::~Yolopp()
+Darknetpp::~Darknetpp()
 {
     if(arap)
         delete arap;

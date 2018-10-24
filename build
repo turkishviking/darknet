@@ -2,8 +2,7 @@
 if ! test "$BUILD_DIR"; then
   echo "You need to set the BUILD_DIR variable to use this script."
   echo
-    echo "export BUILD_DIR=\"_build\""
-  exit 1
+    BUILD_DIR="_build"
 fi
 
 CLEAN_OPT=""

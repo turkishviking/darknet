@@ -193,7 +193,7 @@ add_library(${PROJECT_NAME}
 	# cpp wrapper from https://github.com/prabindh/darknet/tree/master/arapaho
 	src/arapaho.cpp
 	# cpp wrapper from https://github.com/turkishviking/darknet/tree/master/arapaho
-	src/yolopp.cpp
+	src/darknetpp.cpp
 	# add cuda compile result (empty if USE_GPU is OFF
 	${CUDA_SRC}
 )
