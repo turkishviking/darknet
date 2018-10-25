@@ -227,9 +227,13 @@ target_compile_definitions(${PROJECT_NAME}
 ## Set include directories
 target_include_directories(${PROJECT_NAME}
 	PRIVATE src
-	PRIVATE $<$<BOOL:${USE_GPU}>:${CUDA_TOOLKIT_ROOT_DIR}/include>
 	PUBLIC include
 )
+if (USE_GPU)
+    target_include_directories(${PROJECT_NAME}
+        PRIVATE ${CUDA_TOOLKIT_ROOT_DIR}/include
+    )
+endif()
 # target_include_directories(${PROJECT_NAME} SYSTEM
 # 	PRIVATE ${OpenCV_INCLUDE_DIRS}
 # )
@@ -241,17 +245,24 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE
 		m
 		${CMAKE_THREAD_LIBS_INIT}
-		#
-		# only when USE_GPU is ON
-		$<$<BOOL:${USE_GPU}>:${CUDA_LIBRARIES}>
-		$<$<BOOL:${USE_GPU}>:${CUDA_CUBLAS_LIBRARIES}>
-		$<$<BOOL:${USE_GPU}>:${CUDA_curand_LIBRARY}>
-		# looks like we don't need this  anymore ?
-		# $<$<BOOL:${USE_GPU}>:${CUDA_CUDA_LIBRARY}>
-		#
-		# only when USE_CUDNN is ON
-		${CUDNN_LIBRARIES}
 )
+
+# only when USE_GPU is ON
+if (USE_GPU)
+    target_link_libraries(${PROJECT_NAME}
+	    PRIVATE
+		    ${CUDA_LIBRARIES}
+            ${CUDA_CUBLAS_LIBRARIES}
+            ${CUDA_curand_LIBRARY}
+    )   
+    if(USE_CUDNN)
+    target_link_libraries(${PROJECT_NAME}
+	    PRIVATE
+		    # only when USE_CUDNN is ON
+            ${CUDNN_LIBRARIES}
+    )
+    endif()
+endif()
 
 if(BUILD_TESTING)
 	enable_testing()
