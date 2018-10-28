@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 project(darknet-cpp VERSION 0.0.1)
 
 option(BUILD_SHARED_LIBS "Build a shared library" TRUE)
-option(BUILD_TESTING "Create tests using CMake" FALSE)
+# option(BUILD_TESTING "Create tests using CMake" FALSE)
 option(USE_GPU "Use GPU support" FALSE)
 option(USE_CUDNN "Use cuDNN support" FALSE)
 # option(INSTALL_SOURCE_HEADERS "Install header files from the src directory" FALSE)
@@ -20,9 +20,9 @@ if(BUILD_SHARED_LIBS)
 else()
 	message(STATUS "Configure as a static library")
 endif()
-if(BUILD_SHARED_LIBS)
-	message(STATUS "Configure tests")
-endif()
+# if(BUILD_TESTING)
+# 	message(STATUS "Configure tests")
+# endif()
 # message(" - Install headers ........ ${INSTALL_SOURCE_HEADERS}")
 
 ##
@@ -254,7 +254,7 @@ if (USE_GPU)
 		    ${CUDA_LIBRARIES}
             ${CUDA_CUBLAS_LIBRARIES}
             ${CUDA_curand_LIBRARY}
-    )   
+    )
     if(USE_CUDNN)
     target_link_libraries(${PROJECT_NAME}
 	    PRIVATE
@@ -264,10 +264,8 @@ if (USE_GPU)
     endif()
 endif()
 
-if(BUILD_TESTING)
-	enable_testing()
-	add_subdirectory(test)
-endif()
+enable_testing()
+add_subdirectory(test)
 
 set_target_properties(${PROJECT_NAME}
 	PROPERTIES
