@@ -1,12 +1,16 @@
 # testing dir created by ctest (cmake test tool)
 /Testing
 
+# build dir of the conan test_package
+/test_package/build
+
 # static files needed to run the tests but downloaded at configure time
 /test/test_data/yolov3-tiny.cfg
 /test/test_data/yolov3-tiny.weights
 
-# recommended folder to build the project
-_build/
+# recommended folders to build the project
+/_build
+/_build_conan
 
 # various usless files
 .fuse*

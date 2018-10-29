@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 project(darknet-cpp VERSION 0.0.1)
 
 option(BUILD_SHARED_LIBS "Build a shared library" TRUE)
-option(BUILD_TESTING "Create tests using CMake" FALSE)
+# option(BUILD_TESTING "Create tests using CMake" FALSE)
 option(USE_GPU "Use GPU support" FALSE)
 option(USE_CUDNN "Use cuDNN support" FALSE)
 # option(INSTALL_SOURCE_HEADERS "Install header files from the src directory" FALSE)
@@ -20,9 +20,9 @@ if(BUILD_SHARED_LIBS)
 else()
 	message(STATUS "Configure as a static library")
 endif()
-if(BUILD_SHARED_LIBS)
-	message(STATUS "Configure tests")
-endif()
+# if(BUILD_TESTING)
+# 	message(STATUS "Configure tests")
+# endif()
 # message(" - Install headers ........ ${INSTALL_SOURCE_HEADERS}")
 
 ##
@@ -227,9 +227,13 @@ target_compile_definitions(${PROJECT_NAME}
 ## Set include directories
 target_include_directories(${PROJECT_NAME}
 	PRIVATE src
-	PRIVATE $<$<BOOL:${USE_GPU}>:${CUDA_TOOLKIT_ROOT_DIR}/include>
 	PUBLIC include
 )
+if (USE_GPU)
+    target_include_directories(${PROJECT_NAME}
+        PRIVATE ${CUDA_TOOLKIT_ROOT_DIR}/include
+    )
+endif()
 # target_include_directories(${PROJECT_NAME} SYSTEM
 # 	PRIVATE ${OpenCV_INCLUDE_DIRS}
 # )
@@ -241,22 +245,27 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE
 		m
 		${CMAKE_THREAD_LIBS_INIT}
-		#
-		# only when USE_GPU is ON
-		$<$<BOOL:${USE_GPU}>:${CUDA_LIBRARIES}>
-		$<$<BOOL:${USE_GPU}>:${CUDA_CUBLAS_LIBRARIES}>
-		$<$<BOOL:${USE_GPU}>:${CUDA_curand_LIBRARY}>
-		# looks like we don't need this  anymore ?
-		# $<$<BOOL:${USE_GPU}>:${CUDA_CUDA_LIBRARY}>
-		#
-		# only when USE_CUDNN is ON
-		${CUDNN_LIBRARIES}
 )
 
-if(BUILD_TESTING)
-	enable_testing()
-	add_subdirectory(test)
+# only when USE_GPU is ON
+if (USE_GPU)
+    target_link_libraries(${PROJECT_NAME}
+	    PRIVATE
+		    ${CUDA_LIBRARIES}
+            ${CUDA_CUBLAS_LIBRARIES}
+            ${CUDA_curand_LIBRARY}
+    )
+    if(USE_CUDNN)
+    target_link_libraries(${PROJECT_NAME}
+	    PRIVATE
+		    # only when USE_CUDNN is ON
+            ${CUDNN_LIBRARIES}
+    )
+    endif()
 endif()
+
+enable_testing()
+add_subdirectory(test)
 
 set_target_properties(${PROJECT_NAME}
 	PROPERTIES

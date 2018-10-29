@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+if ! test "$BUILD_CONAN_DIR"; then
+	echo "BUILD_CONAN_DIR is not set, defaulting to _build_conan"
+	BUILD_CONAN_DIR="_build_conan"
+fi
+
+if test $1; then
+	if test $1 = "-c"; then
+		cmake --build "$BUILD_CONAN_DIR" --target clean
+	else
+		echo "The only supported command line option is -c (clean before build)"
+	fi
+fi
+
+
+
+conan install . --install-folder "$BUILD_CONAN_DIR"
+conan build . --build-folder "$BUILD_CONAN_DIR"
+
