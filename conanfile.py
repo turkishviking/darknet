@@ -21,6 +21,10 @@ class DarknetcppConan(ConanFile):
     generators = 'cmake'
     exports_sources = 'CMakeLists.txt', 'include/*', 'src/*', 'test/*'
 
+    def configure(self):
+        if self.options.cudnn and not self.options.gpu:
+            raise Exception("cuDNN support requires GPU support")
+
     def build(self):
         cmake = CMake(self)
         # When building for cygwin and  on cygwin we need to remove CMAKE_SYSTEM_NAME (not cross compiling)
