@@ -12,5 +12,5 @@ if test $1; then
 	fi
 fi
 
-conan install . --install-folder "$BUILD_CONAN_DIR"
-conan build . --build-folder "$BUILD_CONAN_DIR"
+conan install . --install-folder "$BUILD_CONAN_DIR" || exit 1
+conan build . --build-folder "$BUILD_CONAN_DIR" || exit 2
