@@ -224,14 +224,19 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 )
 
 ## Set compile definitions
+## no need to add -D in front of the definitions
 target_compile_definitions(${PROJECT_NAME}
 	PRIVATE
-		# no need to add -D in front of the definitions
 		OPENCV
 		CV_MAJOR_VERSION=${OpenCV_VERSION_MAJOR}
-		$<$<BOOL:${USE_GPU}>:GPU>
-		$<$<BOOL:${USE_CUDNN}>:CUDNN>
 )
+if (USE_GPU)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE GPU)
+endif()
+if (USE_CUDNN)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE CUDNN)
+endif()
+
 ## Set include directories
 target_include_directories(${PROJECT_NAME}
 	PRIVATE src
