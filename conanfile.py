@@ -8,8 +8,16 @@ class DarknetcppConan(ConanFile):
     url = '<Package recipe repository url here, for issues about the package>'
     description = '<Description of Darknetcpp here>'
     settings = 'os', 'compiler', 'build_type', 'arch'
-    options = {'shared': [True, False]}
-    default_options = 'shared=True'
+    options = {
+        'shared': [True, False],
+        'gpu': [True, False],
+        'cudnn': [True, False],
+    }
+    default_options = {
+        "shared": True,
+        'gpu': False,
+        'cudnn': False,
+    }
     generators = 'cmake'
     exports_sources = 'CMakeLists.txt', 'include/*', 'src/*', 'test/*'
 
@@ -19,10 +27,21 @@ class DarknetcppConan(ConanFile):
         if platform.system().startswith('CYGWIN'):
             del cmake.definitions['CMAKE_SYSTEM_NAME']
 
-        # cmake.command_line is used to configure
-        # cmake.build_config is used to build
-        # check the content of these to see how cmake is called
+        if self.options.gpu:
+            cmake.definitions['USE_GPU'] = True
+
+        if self.options.cudnn:
+            cmake.definitions['USE_CUDNN'] = True
+
+        # cmake.command_line is used to configure the project, you can
+        # easily debug it using the following line:
+        # print(*cmake.command_line.split(), sep="\n")
+        
+        # cmake.build_config is used to build (compile/link) the project
+
+        # if you need verbose output from cmake, use this:
         # cmake.verbose = True
+
         cmake.configure()
         cmake.build()
         cmake.test()
