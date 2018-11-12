@@ -1,7 +1,7 @@
 # Have a look to that excellent answer on SO:
 # https://stackoverflow.com/questions/17511496/how-to-create-a-shared-library-with-cmake
 cmake_minimum_required(VERSION 3.5)
-set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_CXX_STANDARD 11)
 project(darknet-cpp VERSION 0.0.1)
 
 option(BUILD_SHARED_LIBS "Build a shared library" TRUE)
@@ -13,12 +13,20 @@ option(USE_CUDNN "Use cuDNN support" FALSE)
 ##
 # Let the user know what options are selected
 ##
-message(STATUS "Configure GPU support ${USE_GPU}")
-message(STATUS "Configure cuDNN support ${USE_CUDNN}")
 if(BUILD_SHARED_LIBS)
-	message(STATUS "Configure as a shared library")
+	message(STATUS "Configure as a SHARED library")
 else()
-	message(STATUS "Configure as a static library")
+	message(STATUS "Configure as a STATIC library")
+endif()
+if(USE_GPU)
+	message(STATUS "GPU support ON")
+else()
+	message(STATUS "GPU support OFF")
+endif()
+if(USE_CUDNN)
+	message(STATUS "cuDNN support ON")
+else()
+	message(STATUS "cuDNN support OFF")
 endif()
 # if(BUILD_TESTING)
 # 	message(STATUS "Configure tests")
@@ -216,27 +224,34 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 )
 
 ## Set compile definitions
+## no need to add -D in front of the definitions
 target_compile_definitions(${PROJECT_NAME}
 	PRIVATE
-		# no need to add -D in front of the definitions
 		OPENCV
 		CV_MAJOR_VERSION=${OpenCV_VERSION_MAJOR}
-		$<$<BOOL:${USE_GPU}>:GPU>
-		$<$<BOOL:${USE_CUDNN}>:CUDNN>
 )
+if (USE_GPU)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE GPU)
+endif()
+if (USE_CUDNN)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE CUDNN)
+endif()
+
 ## Set include directories
 target_include_directories(${PROJECT_NAME}
 	PRIVATE src
-	PUBLIC include
+	PUBLIC
+		include
+		${OpenCV_INCLUDE_DIRS}
 )
 if (USE_GPU)
     target_include_directories(${PROJECT_NAME}
         PRIVATE ${CUDA_TOOLKIT_ROOT_DIR}/include
     )
 endif()
-# target_include_directories(${PROJECT_NAME} SYSTEM
-# 	PRIVATE ${OpenCV_INCLUDE_DIRS}
-# )
+target_include_directories(${PROJECT_NAME} SYSTEM
+	PUBLIC ${OpenCV_INCLUDE_DIRS}
+)
 
 ## link libraries
 target_link_libraries(${PROJECT_NAME}

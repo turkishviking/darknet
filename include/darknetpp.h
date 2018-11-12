@@ -19,7 +19,7 @@ struct yoloDetection
     float ry;
     float rw;
     float rh;
-
+    bool isAlone = false;
 };
 class ArapahoV2;
 
