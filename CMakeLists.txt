@@ -1,7 +1,7 @@
 # Have a look to that excellent answer on SO:
 # https://stackoverflow.com/questions/17511496/how-to-create-a-shared-library-with-cmake
 cmake_minimum_required(VERSION 3.5)
-set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_CXX_STANDARD 11)
 project(darknet-cpp VERSION 0.0.1)
 
 option(BUILD_SHARED_LIBS "Build a shared library" TRUE)
@@ -240,16 +240,18 @@ endif()
 ## Set include directories
 target_include_directories(${PROJECT_NAME}
 	PRIVATE src
-	PUBLIC include
+	PUBLIC
+		include
+		${OpenCV_INCLUDE_DIRS}
 )
 if (USE_GPU)
     target_include_directories(${PROJECT_NAME}
         PRIVATE ${CUDA_TOOLKIT_ROOT_DIR}/include
     )
 endif()
-# target_include_directories(${PROJECT_NAME} SYSTEM
-# 	PRIVATE ${OpenCV_INCLUDE_DIRS}
-# )
+target_include_directories(${PROJECT_NAME} SYSTEM
+	PUBLIC ${OpenCV_INCLUDE_DIRS}
+)
 
 ## link libraries
 target_link_libraries(${PROJECT_NAME}
