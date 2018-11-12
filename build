@@ -13,8 +13,8 @@ if test $1; then
 fi
 
 BUILD_SHARED_LIBS="ON"
-USE_GPU="OFF"
-USE_CUDNN="OFF"
+USE_GPU="ON"
+USE_CUDNN="ON"
 
 # @todo would be nice to have command line options to enable the compile options
 #       easily but that would require some work on the option parsing
