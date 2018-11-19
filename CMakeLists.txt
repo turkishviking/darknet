@@ -1,8 +1,10 @@
 # Have a look to that excellent answer on SO:
 # https://stackoverflow.com/questions/17511496/how-to-create-a-shared-library-with-cmake
 cmake_minimum_required(VERSION 3.5)
+set(CMAKE_CXX_STANDARD 11)
+
 # set(CMAKE_CXX_STANDARD 11)
-project(darknet-cpp VERSION 0.0.1)
+project(darknet-cpp VERSION 0.0.1 )
 
 option(BUILD_SHARED_LIBS "Build a shared library" TRUE)
 # option(BUILD_TESTING "Create tests using CMake" FALSE)
@@ -257,6 +259,7 @@ target_include_directories(${PROJECT_NAME} SYSTEM
 target_link_libraries(${PROJECT_NAME}
 	PUBLIC
 		${OpenCV_LIBS}
+		stdc++
 	PRIVATE
 		m
 		${CMAKE_THREAD_LIBS_INIT}

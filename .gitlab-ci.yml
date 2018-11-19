@@ -1,0 +1,55 @@
+stages:
+- build and push
+
+variables:
+    # CONAN_UPLOAD: the repo url
+    CONAN_UPLOAD: "https://artifactory.trust-two-i.net/artifactory/api/conan/conan"
+    # CONAN_USERNAME: the namespace of the package
+    CONAN_USERNAME: "twoi"
+    # CONAN_CHANNEL: kind of a branch, allow us to have multiple version of the package
+    CONAN_CHANNEL: "dev"
+    # CONAN_LOGIN_USERNAME: the username to login to the repo
+    CONAN_LOGIN_USERNAME: "gitlab-ci-pusher"
+    # GIT_SUBMODULE_STRATEGY is needed to fetch git submodules in the CI job
+    # "normal" means fetch only top-level (our project) submodules
+    # "recursive" means fetch submodules of submodules
+    GIT_SUBMODULE_STRATEGY: normal
+    #set conan package version from git branch tag
+    CONAN_VERSION: "${CI_COMMIT_REF_NAME}"
+
+.build-template: &build-template
+    stage: build and push
+    image: dev.trust-two-i.net:5001/twoi/docker_images/environment/cuda/9.2_devel_nodejs_10.9.0_gpujpg_ffmpeg_3.4.1_opencv_3.4.1
+    variables:
+        CONAN_PIP_USE_SUDO: "False"
+        CONAN_ARCHS: "x86_64"
+        CONAN_GCC_VERSIONS: "5"
+        CONAN_BUILD_TYPES: "Release"
+    before_script:
+    ## install pip
+    - apt-get update
+    - apt-get install -y python-pkg-resources python-setuptools
+    - easy_install pip
+    ## install conan using pip
+    - pip install --upgrade conan_package_tools
+    ## install Two-i self-signed public cert to be able to push to our Conan repo
+    - mkdir -p /root/.conan
+    - wget --quiet -O - http://static.trust-two-i.net/trust-two-i.net.pub.cert >> ~/.conan/cacert.pem
+    ## add/ update repo as a remote named twoi in the first position (-i flag, zero indexed)
+    - conan remote add -i 0 -f twoi https://artifactory.trust-two-i.net/artifactory/api/conan/conan true
+    ## Set CXX standard to 11
+    - conan profile new default --detect
+    - conan profile update settings.compiler.libcxx=libstdc++11 default
+    ## link to node binaries (should be done in the environment docker image)
+    - NODE_INSTALL_PATH="/opt/nodejs"
+    - ln -s "$NODE_INSTALL_PATH/current/bin/node" "/bin/node"
+    - ln -s "$NODE_INSTALL_PATH/current/bin/npm" "/bin/npm"
+    - ln -s "$NODE_INSTALL_PATH/current/bin/npx" "/bin/npx"
+    - ln -s "$NODE_INSTALL_PATH/current/include/node" "/usr/include/node"
+
+linux-x86_64:
+    <<: *build-template
+    script:
+    - npm i
+    - conan install .
+    - python build.py

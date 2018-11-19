@@ -29,3 +29,6 @@ Thumbs.db
 
 #ide (qt)
 *.txt.user
+
+cmake-build-debug/*
+.idea/*
