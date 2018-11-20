@@ -19,7 +19,7 @@ variables:
 
 .build-template: &build-template
     stage: build and push
-    image: dev.trust-two-i.net:5001/twoi/docker_images/environment/cuda/9.2_devel_nodejs_10.9.0_gpujpg_ffmpeg_3.4.1_opencv_3.4.1
+    image: dev.trust-two-i.net:5001/twoi/docker_images/environment/cuda/9.2_devel_nodejs_10.9.0_gpujpg_ffmpeg_3.4.1_opencv_3.4.3
     variables:
         CONAN_PIP_USE_SUDO: "False"
         CONAN_ARCHS: "x86_64"
