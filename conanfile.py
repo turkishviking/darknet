@@ -36,6 +36,9 @@ class DarknetcppConan(ConanFile):
 
         if self.options.cudnn:
             cmake.definitions['USE_CUDNN'] = True
+            
+        if self.options.shared:
+            cmake.definitions['BUILD_SHARED_LIBS'] = True
 
         # cmake.command_line is used to configure the project, you can
         # easily debug it using the following line:
