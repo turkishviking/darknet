@@ -51,8 +51,8 @@ class DarknetcppConan(ConanFile):
 
         cmake.configure()
         cmake.build()
-        #cmake.test()
-        self.run("ctest . -VV")
+        #cmake.test() //can't make test as builder has no cuda runtime binded from host
+        #self.run("ctest . -VV")
 
     def package(self):
         self.copy('*.h', dst='include', src='include')
