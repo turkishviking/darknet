@@ -10,7 +10,7 @@
 
 struct yoloDetection
 {
-    std::string label;
+    std::string label = "";
     int x;
     int y;
     int width;
