@@ -51,7 +51,8 @@ class DarknetcppConan(ConanFile):
 
         cmake.configure()
         cmake.build()
-        #cmake.test()
+        cmake.test()
+        self.run("ctest . -VV")
 
     def package(self):
         self.copy('*.h', dst='include', src='include')
