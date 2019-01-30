@@ -80,6 +80,7 @@ std::vector<yoloDetection> Darknetpp::detect(cv::Mat &inputImage, float &&thresh
     {
         boxes = new box[numObjects];
         labels = new std::string[numObjects];
+        probs = new float[numObjects];
         if(!boxes)
         {
             if(arap) delete arap;
@@ -97,7 +98,7 @@ std::vector<yoloDetection> Darknetpp::detect(cv::Mat &inputImage, float &&thresh
         }
 
         // Get boxes and labels
-        arap->GetBoxes(boxes, labels, numObjects);
+        arap->GetBoxes(boxes, labels, probs, numObjects);
 
         int objId = 0;
         int leftTopX = 0, leftTopY = 0, rightBotX = 0,rightBotY = 0;
@@ -133,7 +134,7 @@ std::vector<yoloDetection> Darknetpp::detect(cv::Mat &inputImage, float &&thresh
                 yoDet.ry = yoDet.y / (float)inputImage.rows;
                 yoDet.rw = yoDet.width / (float)inputImage.cols;
                 yoDet.rh = yoDet.height / (float)inputImage.rows;
-
+                yoDet.prob = probs[objId];
                 result.emplace_back(yoDet);
             }
 
@@ -148,6 +149,11 @@ std::vector<yoloDetection> Darknetpp::detect(cv::Mat &inputImage, float &&thresh
         {
             delete[] labels;
             labels = NULL;
+        }
+        if (probs)
+        {
+            delete[] probs;
+            probs = NULL;
         }
         arap->cleanDetections();
 

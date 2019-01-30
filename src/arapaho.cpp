@@ -290,7 +290,7 @@ bool ArapahoV2::Detect(
 //
 // Query API to get box coordinates and box labels for objects detected
 //
-bool ArapahoV2::GetBoxes(box* outBoxes, std::string* outLabels, int boxCount)
+bool ArapahoV2::GetBoxes(box* outBoxes, std::string* outLabels, float* outProbs, int boxCount)
 {
     
     int count = 0;
@@ -309,6 +309,7 @@ bool ArapahoV2::GetBoxes(box* outBoxes, std::string* outLabels, int boxCount)
             {
                 outLabels[count] = std::string(classNames[j]);
                 outBoxes[count]  = dets[i].bbox;
+                outProbs[count]  = dets[i].prob[j];
                 count ++;
             }
         }

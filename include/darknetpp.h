@@ -19,6 +19,7 @@ struct yoloDetection
     float ry;
     float rw;
     float rh;
+    float prob;
     bool isAlone = false;
 };
 class ArapahoV2;
@@ -35,6 +36,7 @@ private:
     bool fileExists(const char *file);
     box* boxes;
     std::string* labels;
+    float* probs;
 };
 
 #endif // YOLOPP_H
