@@ -7,7 +7,8 @@
 */
 
 #include <stdlib.h>
-#include <io.h>
+
+#include <sys/io.h>
 #include <process.h> /* for getpid() and the exec..() family */
 #include <direct.h> /* for _getcwd() and _chdir() */
 

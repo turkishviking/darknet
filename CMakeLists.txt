@@ -282,6 +282,7 @@ target_link_libraries(${PROJECT_NAME}
 	PUBLIC
 		${OpenCV_LIBS}
 		stdc++
+        -lc
 	PRIVATE
 		m
 		${CMAKE_THREAD_LIBS_INIT}
