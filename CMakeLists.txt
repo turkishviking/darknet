@@ -81,16 +81,17 @@ if(USE_GPU)
 	## Uncoment to get verbose output
 	# set(CUDA_VERBOSE_BUILD ON)
 	CUDA_COMPILE(CUDA_SRC
-		src/convolutional_kernels.cu
-		src/deconvolutional_kernels.cu
-		src/activation_kernels.cu
-		src/im2col_kernels.cu
-		src/col2im_kernels.cu
-		src/blas_kernels.cu
-		src/crop_layer_kernels.cu
-		src/dropout_layer_kernels.cu
-		src/maxpool_layer_kernels.cu
-		src/avgpool_layer_kernels.cu
+        src/activation_kernels.cu
+        src/avgpool_layer_kernels.cu
+        src/blas_kernels.cu
+        src/col2im_kernels.cu
+        src/convolutional_kernels.cu
+        src/crop_layer_kernels.cu
+        src/deconvolutional_kernels.cu
+        src/dropout_layer_kernels.cu
+        src/im2col_kernels.cu
+        src/maxpool_layer_kernels.cu
+        src/network_kernels.cu
 		# src/softmax_layer_kernels.cu # @todo is this important ? Raises compilation errors
 	)
 endif()
@@ -156,56 +157,77 @@ find_package(OpenCV
 # @WARNING markand@freenode/#cmake reported that genex can cause problems in exported targets
 #          in case of doubt replace genex with classic if()endif()
 add_library(${PROJECT_NAME}
-	src/activation_layer.c
-	src/activations.c
-	src/avgpool_layer.c
-	src/batchnorm_layer.c
-	src/blas.c
-	src/box.c
-	src/col2im.c
-	src/connected_layer.c
-	src/convolutional_layer.c
-	src/cost_layer.c
-	src/crnn_layer.c
-	src/crop_layer.c
-	src/cuda.c
-	src/data.c
-	src/deconvolutional_layer.c
-	src/demo.c
-	src/detection_layer.c
-	src/dropout_layer.c
-	src/gemm.c
-	src/gru_layer.c
-	src/im2col.c
-	src/image.c
-	src/l2norm_layer.c
-	src/layer.c
-	src/list.c
-	src/local_layer.c
-	src/logistic_layer.c
-	src/lstm_layer.c
-	src/matrix.c
-	src/maxpool_layer.c
-	src/network.c
-	src/normalization_layer.c
-	src/option_list.c
-	src/parser.c
-	src/region_layer.c
-	src/reorg_layer.c
-	src/rnn_layer.c
-	src/route_layer.c
-	src/shortcut_layer.c
-	src/softmax_layer.c
-	src/tree.c
-	src/upsample_layer.c
-	src/utils.c
-	src/yolo_layer.c
-	# cpp wrapper from https://github.com/prabindh/darknet/tree/master/arapaho
-	src/arapaho.cpp
-	# cpp wrapper from https://github.com/turkishviking/darknet/tree/master/arapaho
-	src/darknetpp.cpp
-	# add cuda compile result (empty if USE_GPU is OFF
-	${CUDA_SRC}
+    src/activation_layer.c
+    src/activations.c
+    src/arapaho.cpp
+    src/art.c
+    src/avgpool_layer.c
+    src/batchnorm_layer.c
+    src/blas.c
+    src/box.c
+    src/captcha.c
+    src/cifar.c
+    src/classifier.c
+    src/coco.c
+    src/col2im.c
+    src/compare.c
+    src/connected_layer.c
+    src/convolutional_layer.c
+    src/cost_layer.c
+    src/cpu_gemm.c
+    src/crnn_layer.c
+    src/crop_layer.c
+    src/cuda.c
+    src/darknetpp.cpp
+    src/darknet.c
+    src/data.c
+    src/deconvolutional_layer.c
+    src/demo.c
+    src/detection_layer.c
+    src/detector.c
+    src/dice.c
+    src/dropout_layer.c
+    src/gemm.c
+    src/getopt.c
+    src/gettimeofday.c
+    src/go.c
+    src/gru_layer.c
+    src/http_stream.cpp
+    src/im2col.c
+    src/image.c
+    src/layer.c
+    src/list.c
+    src/local_layer.c
+    src/lstm_layer.c
+    src/matrix.c
+    src/maxpool_layer.c
+    src/network.c
+    src/nightmare.c
+    src/normalization_layer.c
+    src/option_list.c
+    src/parser.c
+    src/region_layer.c
+    src/reorg_layer.c
+    src/reorg_old_layer.c
+    src/rnn.c
+    src/rnn_layer.c
+    src/rnn_vid.c
+    src/route_layer.c
+    src/shortcut_layer.c
+    src/softmax_layer.c
+    src/super.c
+    src/swag.c
+    src/tag.c
+    src/tree.c
+    src/upsample_layer.c
+    src/utils.c
+    src/voxel.c
+    src/writing.c
+    src/yolo.c
+    src/yolo_console_dll.cpp
+    src/yolo_layer.c
+    src/yolo_v2_class.cpp
+    ${CUDA_SRC}
 )
 
 ## Set compile options
