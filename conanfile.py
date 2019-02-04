@@ -3,7 +3,7 @@ from conans import ConanFile, CMake
 
 class DarknetcppConan(ConanFile):
     name = 'darknet-cpp'
-    version = '0.1'
+    version = 'cuda-10'
     license = '<Put the package license here>'
     url = '<Package recipe repository url here, for issues about the package>'
     description = '<Description of Darknetcpp here>'
