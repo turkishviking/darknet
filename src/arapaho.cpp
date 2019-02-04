@@ -39,7 +39,7 @@ ArapahoV2::~ArapahoV2()
     
     // free VRAM & Ram 
     if(net)
-        free_network(&net);
+        free_network((*net));
     net = NULL;
 }
     
