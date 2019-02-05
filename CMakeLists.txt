@@ -221,7 +221,7 @@ add_library(${PROJECT_NAME}
     src/lstm_layer.c
     src/yolo_v2_class.cpp
     src/arapaho.cpp
-    #src/darknetpp.cpp
+    src/darknetpp.cpp
     ${CUDA_SRC}
 )
 
