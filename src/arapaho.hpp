@@ -18,14 +18,16 @@
 #include <locale.h>
 #include <string>
 #include <opencv2/opencv.hpp>
+extern "C" {
 #include "network.h"
+#include "parser.h"
 #include "detection_layer.h"
 #include "cost_layer.h"
 #include "utils.h"
-#include "parser.h"
 #include "box.h"
 #include "region_layer.h"
 #include "option_list.h"
+}
 
 //////////////////////////////////////////////////////////////////////////
 

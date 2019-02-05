@@ -8,7 +8,6 @@
  * Forked from, https://github.com/pjreddie/darknet                      *
  *                                                                       *
  *************************************************************************/
-
 #include "arapaho.hpp"
 
 ArapahoV2::ArapahoV2()
@@ -343,7 +342,7 @@ void ArapahoV2::__Detect(float* inData, float thresh, float hier_thresh, int & o
     network_predict(net, inData);
     
     nboxes = 0;
-    dets = get_network_boxes(&net, 1, 1, hier_thresh, 0, 0, 0, &nboxes);
+    dets = get_network_boxes(&net, 1, 1, hier_thresh, 0, 0, 0, &nboxes, 1);
     if(nms)
     {
         do_nms_sort(dets, nboxes, l.classes, 0.5);

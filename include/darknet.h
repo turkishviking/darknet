@@ -11,6 +11,7 @@
 #include <pthread.h>
 #include <stdint.h>
 
+
 #ifdef LIB_EXPORTS
 #if defined(_MSC_VER)
 #define LIB_API __declspec(dllexport)

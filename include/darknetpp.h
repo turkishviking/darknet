@@ -8,6 +8,7 @@
 #include <opencv2/opencv.hpp>
 #include <darknet.h>
 
+
 struct yoloDetection
 {
     std::string label = "";
