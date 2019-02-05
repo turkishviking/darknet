@@ -114,7 +114,7 @@ extern "C" {
         char    **classNames;
         float   **probs;
         bool    bSetup;
-        network net;
+        network *net;
         layer   l;
         float   nms;
         int     maxClasses;
