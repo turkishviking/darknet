@@ -114,11 +114,12 @@ extern "C" {
         char    **classNames;
         float   **probs;
         bool    bSetup;
-        network *net;
+        network net;
         layer   l;
         float   nms;
         int     maxClasses;
         float     threshold;
+        bool    isNetInitialized = false;
 
         void __Detect(float* inData, float thresh, float hier_thresh, int & objectCount);
     };
