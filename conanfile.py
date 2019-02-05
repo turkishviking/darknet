@@ -18,7 +18,7 @@ class DarknetcppConan(ConanFile):
         "shared": True,
         'gpu': True,
         'cudnn': True,
-        'half_cudnn': [True]
+        'half_cudnn': True
     }
     generators = 'cmake'
     exports_sources = 'CMakeLists.txt', 'include/*', 'src/*', 'test/*'
