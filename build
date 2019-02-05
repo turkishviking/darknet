@@ -14,6 +14,7 @@ fi
 
 BUILD_SHARED_LIBS="ON"
 USE_GPU="ON"
+GPU="ON"
 USE_CUDNN="ON"
 USE_CUDNN_HALF="ON"
 
@@ -23,7 +24,8 @@ cmake . -B"$BUILD_DIR" \
 	-DUSE_GPU="$USE_GPU" \
 	-DUSE_CUDNN="$USE_CUDNN" \
 	-DUSE_CUDNN_HALF="$USE_CUDNN_HALF" \
-	-DBUILD_SHARED_LIBS="$BUILD_SHARED_LIBS"
+	-DBUILD_SHARED_LIBS="$BUILD_SHARED_LIBS" \
+    -DGPU="$GPU"
 
 
 # @todo would be nice to have a command line option to enable verbose, or parallel processing

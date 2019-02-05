@@ -12,22 +12,45 @@
 #ifndef _ENABLE_ARAPAHO
 #define _ENABLE_ARAPAHO
 
+#ifdef LIB_EXPORTS
+#if defined(_MSC_VER)
+#define LIB_API __declspec(dllexport)
+#else
+#define LIB_API __attribute__((visibility("default")))
+#endif
+#else
+#if defined(_MSC_VER)
+#define LIB_API
+#else
+#define LIB_API
+#endif
+#endif
+
+#ifdef __cplusplus
+
+#include "network.h"
+
+extern "C" {
+#include "detection_layer.h"
+#include "region_layer.h"
+#include "cost_layer.h"
+#include "utils.h"
+#include "parser.h"
+#include "box.h"
+#include "image.h"
+#include "demo.h"
+#include "option_list.h"
+#include "stb_image.h"
+
+}
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <locale.h>
 #include <string>
 #include <opencv2/opencv.hpp>
-extern "C" {
-#include "network.h"
-#include "parser.h"
-#include "detection_layer.h"
-#include "cost_layer.h"
-#include "utils.h"
-#include "box.h"
-#include "region_layer.h"
-#include "option_list.h"
-}
+
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -64,27 +87,27 @@ extern "C" {
     class ArapahoV2
     {
     public:
-        ArapahoV2();
-        ~ArapahoV2();
+        LIB_API ArapahoV2();
+        LIB_API ~ArapahoV2();
 
-        bool Setup(ArapahoV2Params & p,
+       LIB_API  bool Setup(ArapahoV2Params & p,
             int & expectedWidth,
             int & expectedHeight);
 
-        bool Detect(
+        LIB_API bool Detect(
             ArapahoV2ImageBuff & imageBuff,
             float thresh,
             float hier_thresh,
             int & objectCount);
 
-        bool Detect(
+        LIB_API bool Detect(
             const cv::Mat & inputMat,
             float thresh,
             float hier_thresh,
             int & objectCount);
 
-        bool GetBoxes(box* outBoxes, std::string* outLabels, float *outProbs, int boxCount);
-        void cleanDetections();
+        LIB_API bool GetBoxes(box* outBoxes, std::string* outLabels, float *outProbs, int boxCount);
+        LIB_API void cleanDetections();
     private:
         detection *dets;
         int     nboxes;
@@ -104,3 +127,4 @@ extern "C" {
 
 
 #endif // _ENABLE_ARAPAHO
+#endif // cpulsplus

@@ -70,6 +70,7 @@ if(USE_GPU)
 		-gencode arch=compute_35,code=sm_35
 		-gencode arch=compute_50,code=[sm_50,compute_50]
 		-gencode arch=compute_52,code=[sm_52,compute_52]
+                -gencode arch=compute_70,code=[sm_70,compute_70]
 		-Xcompiler
 		-fPIC
 		-DGPU
@@ -91,7 +92,7 @@ if(USE_GPU)
         src/dropout_layer_kernels.cu
         src/maxpool_layer_kernels.cu
         src/network_kernels.cu
-        src/avgpool_layer_kernels.o
+        src/avgpool_layer_kernels.cu
 	)
 endif()
 
@@ -220,7 +221,7 @@ add_library(${PROJECT_NAME}
     src/lstm_layer.c
     src/yolo_v2_class.cpp
     src/arapaho.cpp
-    src/darknetpp.cpp
+    #src/darknetpp.cpp
     ${CUDA_SRC}
 )
 
