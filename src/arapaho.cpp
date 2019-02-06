@@ -24,7 +24,7 @@ ArapahoV2::ArapahoV2()
     
 ArapahoV2::~ArapahoV2()
 {
-    if(probs)
+    if(probs && l.size != 0)
         free_ptrs((void **)probs, l.w*l.h*l.n);
     if(classNames)
     {

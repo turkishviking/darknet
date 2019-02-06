@@ -36,6 +36,7 @@ int main(int argc, char* argv[])
     cout << endl;
 
     Darknetpp y;
+    y = Darknetpp(); //ensure that object can be correctly destroyed
     bool loaded = y.load(data, cfg, weights);
     if (!loaded) 
         return 2;

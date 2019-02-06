@@ -6,7 +6,7 @@
 
 Darknetpp::Darknetpp()
 {
-    arap = new ArapahoV2();
+    arap = 0;
 }
 
 bool Darknetpp::fileExists(const char *file)
