@@ -30,6 +30,12 @@ if(USE_CUDNN)
 else()
 	message(STATUS "cuDNN support OFF")
 endif()
+if(USE_CUDNN_HALF)
+        message(STATUS "cuDNN float_16 support ON")
+else()
+        message(STATUS "cuDNN float_16 OFF")
+endif()
+
 # if(BUILD_TESTING)
 # 	message(STATUS "Configure tests")
 # endif()
@@ -76,7 +82,8 @@ if(USE_GPU)
 		-DGPU
 	)
 	if(USE_CUDNN)
-		list(APPEND CUDA_NVCC_FLAGS -DCUDNN)
+                list(APPEND CUDA_NVCC_FLAGS -DCUDNN)
+                list(APPEND CUDA_NVCC_FLAGS -DCUDNN_HALF)
 	endif()
 
 	## Cuda compilation
