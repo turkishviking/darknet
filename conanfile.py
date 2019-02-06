@@ -3,7 +3,7 @@ from conans import ConanFile, CMake
 
 class DarknetcppConan(ConanFile):
     name = 'darknet-cpp'
-    version = '0.1'
+    version = 'cuda-10'
     license = '<Put the package license here>'
     url = '<Package recipe repository url here, for issues about the package>'
     description = '<Description of Darknetcpp here>'
@@ -12,11 +12,13 @@ class DarknetcppConan(ConanFile):
         'shared': [True, False],
         'gpu': [True, False],
         'cudnn': [True, False],
+        'half_cudnn': [True, False]
     }
     default_options = {
         "shared": True,
         'gpu': True,
         'cudnn': True,
+        'half_cudnn': True
     }
     generators = 'cmake'
     exports_sources = 'CMakeLists.txt', 'include/*', 'src/*', 'test/*'
@@ -39,6 +41,9 @@ class DarknetcppConan(ConanFile):
             
         if self.options.shared:
             cmake.definitions['BUILD_SHARED_LIBS'] = True
+
+        if self.options.half_cudnn:
+            cmake.definitions['USE_CUDNN_HALF'] = True
 
         # cmake.command_line is used to configure the project, you can
         # easily debug it using the following line:

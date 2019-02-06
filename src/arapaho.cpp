@@ -8,7 +8,6 @@
  * Forked from, https://github.com/pjreddie/darknet                      *
  *                                                                       *
  *************************************************************************/
-
 #include "arapaho.hpp"
 
 ArapahoV2::ArapahoV2()
@@ -16,7 +15,6 @@ ArapahoV2::ArapahoV2()
     probs = 0;
     classNames = 0;
     l = {};
-    net = 0;
     nms = 0;
     maxClasses = 0;
     threshold = 0;
@@ -26,7 +24,7 @@ ArapahoV2::ArapahoV2()
     
 ArapahoV2::~ArapahoV2()
 {
-    if(probs)
+    if(probs && l.size != 0)
         free_ptrs((void **)probs, l.w*l.h*l.n);
     if(classNames)
     {
@@ -37,10 +35,9 @@ ArapahoV2::~ArapahoV2()
     classNames = 0;
     bSetup = false;
     
-    // free VRAM & Ram 
-    if(net)
+    // free VRAM & Ram
+    if(isNetInitialized)
         free_network(net);
-    net = NULL;
 }
     
 bool ArapahoV2::Setup(
@@ -96,12 +93,12 @@ bool ArapahoV2::Setup(
     maxClasses = p.maxClasses;
     
     net = parse_network_cfg(p.cfgfile);
-    DPRINTF("Setup: net->n = %d\n", net->n);   
-    DPRINTF("net->layers[0].batch = %d\n", net->layers[0].batch);
+    DPRINTF("Setup: net.n = %d\n", net.n);
+    DPRINTF("net.layers[0].batch = %d\n", net.layers[0].batch);
     
-    load_weights(net, p.weightfile);
-    set_batch_network(net, 1);     
-    l = net->layers[net->n-1];
+    load_weights(&net, p.weightfile);
+    set_batch_network(&net, 1);
+    l = net.layers[net.n-1];
     DPRINTF("Setup: layers = %d, %d, %d\n", l.w, l.h, l.n);
 
     // Class limiter
@@ -110,9 +107,9 @@ bool ArapahoV2::Setup(
         EPRINTF("Warning: Read classes from cfg (%d) > maxClasses (%d)\n", l.classes, maxClasses);
     }    
     
-    expectedHeight = net->h;
-    expectedWidth = net->w;
-    DPRINTF("Image expected w,h = [%d][%d]!\n", net->w, net->h);            
+    expectedHeight = net.h;
+    expectedWidth = net.w;
+    DPRINTF("Image expected w,h = [%d][%d]!\n", net.w, net.h);
     
     probs = (float**)calloc(l.w*l.h*l.n, sizeof(float *));
     
@@ -135,6 +132,7 @@ bool ArapahoV2::Setup(
     ret = true;
     bSetup = ret;
     DPRINTF("Setup: Done\n");
+    isNetInitialized = true;
     return ret;
     
 clean_exit:        
@@ -172,8 +170,8 @@ bool ArapahoV2::Detect(
     if (!imageBuff.bgr)
     {
         EPRINTF("Error in imageBuff! [bgr = %d, w = %d, h = %d]\n",
-            !imageBuff.bgr, imageBuff.w != net->w,
-            imageBuff.h != net->h);
+            !imageBuff.bgr, imageBuff.w != net.w,
+            imageBuff.h != net.h);
         return false;
     }
 
@@ -184,8 +182,8 @@ bool ArapahoV2::Detect(
         inputImage.h != imageBuff.h)
     {
         EPRINTF("Error in inputImage! [bgr = %d, w = %d, h = %d]\n",
-            !inputImage.data, inputImage.w != net->w,
-            inputImage.h != net->h);
+            !inputImage.data, inputImage.w != net.w,
+            inputImage.h != net.h);
         free_image(inputImage);
         return false;
     }
@@ -204,19 +202,19 @@ bool ArapahoV2::Detect(
     inputImage.w = imageBuff.w;
     inputImage.c = imageBuff.channels;
 
-    if (inputImage.h != net->h || inputImage.w != net->w)
+    if (inputImage.h != net.h || inputImage.w != net.w)
     {
         DPRINTF("Detect: Resizing image to match network \n");
         // Free the original buffer, and assign a new resized buffer
-        image inputImageTemp = resize_image(inputImage, net->w, net->h);
+        image inputImageTemp = resize_image(inputImage, net.w, net.h);
         free_image(inputImage);
         inputImage = inputImageTemp;
-        if (!inputImage.data || inputImage.w != net->w ||
-            inputImage.h != net->h)
+        if (!inputImage.data || inputImage.w != net.w ||
+            inputImage.h != net.h)
         {
             EPRINTF("Error in resized img! [data = %d, w = %d, h = %d]\n",
-                !inputImage.data, inputImage.w != net->w,
-                inputImage.h != net->h);
+                !inputImage.data, inputImage.w != net.w,
+                inputImage.h != net.h);
             return false;
         }
     }
@@ -253,8 +251,8 @@ bool ArapahoV2::Detect(
     if(inputMat.empty())
     {
         EPRINTF("Error in inputImage! [bgr = %d, w = %d, h = %d]\n",
-                    !inputMat.data, inputMat.cols != net->w,
-                    inputMat.rows != net->h);
+                    !inputMat.data, inputMat.cols != net.w,
+                    inputMat.rows != net.h);
         return false;
     }
     
@@ -265,10 +263,10 @@ bool ArapahoV2::Detect(
     cv::Mat floatMat;
     inputRgb.convertTo(floatMat, CV_32FC3, 1/255.0);
 
-    if (floatMat.rows != net->h || floatMat.cols != net->w)
+    if (floatMat.rows != net.h || floatMat.cols != net.w)
     {
         DPRINTF("Detect: Resizing image to match network \n");
-        resize(floatMat, floatMat, cv::Size(net->w, net->h));
+        resize(floatMat, floatMat, cv::Size(net.w, net.h));
     }
 
     if (floatMat.channels() != 3)
@@ -345,7 +343,7 @@ void ArapahoV2::__Detect(float* inData, float thresh, float hier_thresh, int & o
     network_predict(net, inData);
     
     nboxes = 0;
-    dets = get_network_boxes(net, 1, 1, hier_thresh, 0, 0, 0, &nboxes);
+    dets = get_network_boxes(&net, 1, 1, hier_thresh, 0, 0, 0, &nboxes, 1);
     if(nms)
     {
         do_nms_sort(dets, nboxes, l.classes, 0.5);

@@ -8,8 +8,8 @@ project(darknet-cpp VERSION 0.0.1 )
 
 option(BUILD_SHARED_LIBS "Build a shared library" TRUE)
 # option(BUILD_TESTING "Create tests using CMake" FALSE)
-option(USE_GPU "Use GPU support" FALSE)
-option(USE_CUDNN "Use cuDNN support" FALSE)
+option(USE_GPU "Use GPU support" TRUE)
+option(USE_CUDNN "Use cuDNN support" TRUE)
 # option(INSTALL_SOURCE_HEADERS "Install header files from the src directory" FALSE)
 
 ##
@@ -30,6 +30,12 @@ if(USE_CUDNN)
 else()
 	message(STATUS "cuDNN support OFF")
 endif()
+if(USE_CUDNN_HALF)
+        message(STATUS "cuDNN float_16 support ON")
+else()
+        message(STATUS "cuDNN float_16 OFF")
+endif()
+
 # if(BUILD_TESTING)
 # 	message(STATUS "Configure tests")
 # endif()
@@ -54,7 +60,8 @@ if(USE_GPU)
 	# message("")
 
 	SET(CUDA_PROPAGATE_HOST_FLAGS OFF)
-	CUDA_INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+        CUDA_INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+        CUDA_INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 
 	## Manually set the path to Cuda library if find_package could find it
 	## May not be needed anymore if we don't link to it !
@@ -69,29 +76,30 @@ if(USE_GPU)
 		-gencode arch=compute_35,code=sm_35
 		-gencode arch=compute_50,code=[sm_50,compute_50]
 		-gencode arch=compute_52,code=[sm_52,compute_52]
+                -gencode arch=compute_70,code=[sm_70,compute_70]
 		-Xcompiler
 		-fPIC
 		-DGPU
 	)
 	if(USE_CUDNN)
-		list(APPEND CUDA_NVCC_FLAGS -DCUDNN)
+                list(APPEND CUDA_NVCC_FLAGS -DCUDNN)
+                list(APPEND CUDA_NVCC_FLAGS -DCUDNN_HALF)
 	endif()
 
 	## Cuda compilation
 	## Uncoment to get verbose output
 	# set(CUDA_VERBOSE_BUILD ON)
-	CUDA_COMPILE(CUDA_SRC
-		src/convolutional_kernels.cu
-		src/deconvolutional_kernels.cu
-		src/activation_kernels.cu
-		src/im2col_kernels.cu
-		src/col2im_kernels.cu
-		src/blas_kernels.cu
-		src/crop_layer_kernels.cu
-		src/dropout_layer_kernels.cu
-		src/maxpool_layer_kernels.cu
-		src/avgpool_layer_kernels.cu
-		# src/softmax_layer_kernels.cu # @todo is this important ? Raises compilation errors
+        CUDA_COMPILE(CUDA_SRC
+        src/convolutional_kernels.cu
+        src/activation_kernels.cu
+        src/im2col_kernels.cu
+        src/col2im_kernels.cu
+        src/blas_kernels.cu
+        src/crop_layer_kernels.cu
+        src/dropout_layer_kernels.cu
+        src/maxpool_layer_kernels.cu
+        src/network_kernels.cu
+        src/avgpool_layer_kernels.cu
 	)
 endif()
 
@@ -156,66 +164,82 @@ find_package(OpenCV
 # @WARNING markand@freenode/#cmake reported that genex can cause problems in exported targets
 #          in case of doubt replace genex with classic if()endif()
 add_library(${PROJECT_NAME}
-	src/activation_layer.c
-	src/activations.c
-	src/avgpool_layer.c
-	src/batchnorm_layer.c
-	src/blas.c
-	src/box.c
-	src/col2im.c
-	src/connected_layer.c
-	src/convolutional_layer.c
-	src/cost_layer.c
-	src/crnn_layer.c
-	src/crop_layer.c
-	src/cuda.c
-	src/data.c
-	src/deconvolutional_layer.c
-	src/demo.c
-	src/detection_layer.c
-	src/dropout_layer.c
-	src/gemm.c
-	src/gru_layer.c
-	src/im2col.c
-	src/image.c
-	src/l2norm_layer.c
-	src/layer.c
-	src/list.c
-	src/local_layer.c
-	src/logistic_layer.c
-	src/lstm_layer.c
-	src/matrix.c
-	src/maxpool_layer.c
-	src/network.c
-	src/normalization_layer.c
-	src/option_list.c
-	src/parser.c
-	src/region_layer.c
-	src/reorg_layer.c
-	src/rnn_layer.c
-	src/route_layer.c
-	src/shortcut_layer.c
-	src/softmax_layer.c
-	src/tree.c
-	src/upsample_layer.c
-	src/utils.c
-	src/yolo_layer.c
-	# cpp wrapper from https://github.com/prabindh/darknet/tree/master/arapaho
-	src/arapaho.cpp
-	# cpp wrapper from https://github.com/turkishviking/darknet/tree/master/arapaho
-	src/darknetpp.cpp
-	# add cuda compile result (empty if USE_GPU is OFF
-	${CUDA_SRC}
+    src/http_stream.cpp
+    src/gemm.c
+    src/utils.c
+    src/cuda.c
+    src/convolutional_layer.c
+    src/list.c
+    src/image.c
+    src/activations.c
+    src/im2col.c
+    src/col2im.c
+    src/blas.c
+    src/crop_layer.c
+    src/dropout_layer.c
+    src/maxpool_layer.c
+    src/softmax_layer.c
+    src/data.c
+    src/matrix.c
+    src/network.c
+    src/connected_layer.c
+    src/cost_layer.c
+    src/parser.c
+    src/option_list.c
+    src/darknet.c
+    src/detection_layer.c
+    src/captcha.c
+    src/route_layer.c
+    src/writing.c
+    src/box.c
+    src/nightmare.c
+    src/normalization_layer.c
+    src/avgpool_layer.c
+    src/coco.c
+    src/dice.c
+    src/yolo.c
+    src/detector.c
+    src/layer.c
+    src/compare.c
+    src/classifier.c
+    src/local_layer.c
+    src/swag.c
+    src/shortcut_layer.c
+    src/activation_layer.c
+    src/rnn_layer.c
+    src/gru_layer.c
+    src/rnn.c
+    src/rnn_vid.c
+    src/crnn_layer.c
+    src/demo.c
+    src/tag.c
+    src/cifar.c
+    src/go.c
+    src/batchnorm_layer.c
+    src/art.c
+    src/region_layer.c
+    src/reorg_layer.c
+    src/reorg_old_layer.c
+    src/super.c
+    src/voxel.c
+    src/tree.c
+    src/yolo_layer.c
+    src/upsample_layer.c
+    src/lstm_layer.c
+    src/yolo_v2_class.cpp
+    src/arapaho.cpp
+    src/darknetpp.cpp
+    ${CUDA_SRC}
 )
 
 ## Set compile options
 target_compile_options(${PROJECT_NAME} PRIVATE
-	-Wall
-	-Wfatal-errors
-	-Wno-unknown-pragmas
-	-Wno-unused-variable
-	-Wno-unused-value
-	-Wno-unused-result
+        -Wall
+        -Wfatal-errors
+        -Wno-unknown-pragmas
+        -Wno-unused-variable
+        -Wno-unused-value
+        -Wno-unused-result
 	# There is a compile error happening only when optimisation is not on.
 	# Needed on Cygwin + OpenCV-3.4.1 + Intel Core i5 3570
 	# see https://github.com/leggedrobotics/darknet_ros/issues/1#issuecomment-298329957
@@ -241,10 +265,11 @@ endif()
 
 ## Set include directories
 target_include_directories(${PROJECT_NAME}
-	PRIVATE src
-	PUBLIC
-		include
-		${OpenCV_INCLUDE_DIRS}
+        PUBLIC
+            include
+            ${OpenCV_INCLUDE_DIRS}
+        PRIVATE src
+
 )
 if (USE_GPU)
     target_include_directories(${PROJECT_NAME}
@@ -291,6 +316,11 @@ set_target_properties(${PROJECT_NAME}
 	LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
 	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
+message("\n\n------------------------------------------------------------")
+get_property(dirs TARGET ${PROJECT_NAME} PROPERTY INCLUDE_DIRECTORIES)
+foreach(dir ${dirs})
+  message(STATUS "dir='${dir}'")
+endforeach()
 
 # install(TARGETS ${PROJECT_NAME}
 # 	ARCHIVE DESTINATION lib
