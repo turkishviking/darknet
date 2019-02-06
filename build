@@ -16,7 +16,7 @@ BUILD_SHARED_LIBS="ON"
 USE_GPU="ON"
 GPU="ON"
 USE_CUDNN="ON"
-CUDNN_HALF="OFF"
+CUDNN_HALF="ON"
 
 # @todo would be nice to have command line options to enable the compile options
 #       easily but that would require some work on the option parsing
