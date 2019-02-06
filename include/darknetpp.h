@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <opencv2/opencv.hpp>
 #include <darknet.h>
+#include <memory>
 
 struct yoloDetection
 {
@@ -22,7 +23,7 @@ struct yoloDetection
     float prob;
     bool isAlone = false;
 };
-class ArapahoV2;
+class Detector;
 
 class Darknetpp
 {
@@ -30,13 +31,10 @@ public:
     Darknetpp();
     ~Darknetpp();
     bool load(std::string data, std::string cfg, std::string weights);
-    std::vector<yoloDetection> detect(cv::Mat &inputImage, float &&threshold, float &&hierThreshold);
+    std::vector<yoloDetection> detect(cv::Mat &inputImage, float threshold, float hierThreshold);
 private:
-    ArapahoV2* arap;
     bool fileExists(const char *file);
-    box* boxes;
-    std::string* labels;
-    float* probs;
+    std::shared_ptr<Detector> detector;
 };
 
 #endif // YOLOPP_H
