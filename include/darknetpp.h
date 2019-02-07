@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <opencv2/opencv.hpp>
-#include <darknet.h>
+
 #include <memory>
 
 struct yoloDetection
@@ -30,11 +30,12 @@ class Darknetpp
 public:
     Darknetpp();
     ~Darknetpp();
-    bool load(std::string data, std::string cfg, std::string weights);
+    bool load(std::string names, std::string cfg, std::string weights);
     std::vector<yoloDetection> detect(cv::Mat &inputImage, float threshold, float hierThreshold);
 private:
     bool fileExists(const char *file);
     std::shared_ptr<Detector> detector;
+    std::vector<std::string> labels;
 };
 
 #endif // YOLOPP_H

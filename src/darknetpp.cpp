@@ -16,8 +16,18 @@ bool Darknetpp::fileExists(const char *file)
     return (0 == result);
 }
 
-bool Darknetpp::load(std::string data, std::string cfg, std::string weights)
+bool Darknetpp::load(std::string names, std::string cfg, std::string weights)
 {
+    std::fstream file;
+    file.open(names, std::ofstream::in);
+    if(file.is_open())
+    {
+        for(std::string line; std::getline(file, line) ; )
+        {
+            labels.push_back(line);
+        }
+    }
+    std::cout << "found " << labels.size() << " categories" << std::endl;
     detector = std::make_shared<Detector>(cfg, weights);
     return true;
 }
@@ -40,7 +50,7 @@ std::vector<yoloDetection> Darknetpp::detect(cv::Mat &inputImage, float threshol
         rightBotY = 1 + imageHeightPixels*(boxes[objId].y + boxes[objId].h / 2);*/
 
         yoloDetection yoDet;
-        yoDet.label = std::to_string(box.obj_id);
+        yoDet.label = labels[box.obj_id];
         yoDet.x = box.x;
         yoDet.y = box.y;
         yoDet.width = box.w;

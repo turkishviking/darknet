@@ -72,10 +72,6 @@ if(USE_GPU)
 
 	## List of nvcc compile flags
 	list(APPEND CUDA_NVCC_FLAGS
-		-gencode arch=compute_30,code=sm_30
-		-gencode arch=compute_35,code=sm_35
-		-gencode arch=compute_50,code=[sm_50,compute_50]
-		-gencode arch=compute_52,code=[sm_52,compute_52]
                 -gencode arch=compute_70,code=[sm_70,compute_70]
 		-Xcompiler
 		-fPIC
@@ -83,8 +79,12 @@ if(USE_GPU)
 	)
 	if(USE_CUDNN)
                 list(APPEND CUDA_NVCC_FLAGS -DCUDNN)
-                list(APPEND CUDA_NVCC_FLAGS -DCUDNN_HALF)
-	endif()
+        endif()
+
+        if(USE_CUDNN_HALF)
+                #list(APPEND CUDA_NVCC_FLAGS -DCUDNN_HALF)
+        endif()
+
 
 	## Cuda compilation
 	## Uncoment to get verbose output

@@ -17,37 +17,37 @@ int main(int argc, char* argv[])
         path = path + '/';
 
     // files used to configure the network
-    string data = path + "coco.data";
+    string names = path + "coco.names";
     string cfg = path + "yolov3-tiny.cfg";
     string weights = path + "yolov3-tiny.weights";
 
     // images we want to test
     string imgfile = path + "dog.jpg";
-    
+
     // ouptut for the command line
     cout << endl;
     cout << "Using the following files to configure the network:" << endl;
-    cout << " - " << data << endl;
+    cout << " - " << names << endl;
     cout << " - " << cfg << endl;
     cout << " - " << weights << endl;
     cout << endl;
     cout << "Using the following files to test the network:" << endl;
-    cout << " - " << data << endl;
+    cout << " - " << names << endl;
     cout << endl;
 
     Darknetpp y;
     y = Darknetpp(); //ensure that object can be correctly destroyed
-    bool loaded = y.load(data, cfg, weights);
-    if (!loaded) 
+    bool loaded = y.load(names, cfg, weights);
+    if (!loaded)
         return 2;
-    
-    try 
+
+    try
     {
         cv::Mat img = cv::imread(imgfile);
         vector<yoloDetection> v = y.detect(img, 0.45, 0.5);
         for (yoloDetection det : v)
             cout << det.label << " ";
-        
+
         cout << endl;
     }
     catch (string error)
