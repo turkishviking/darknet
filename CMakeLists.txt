@@ -72,7 +72,7 @@ if(USE_GPU)
 
 	## List of nvcc compile flags
 	list(APPEND CUDA_NVCC_FLAGS
-                -gencode arch=compute_70,code=[sm_70,compute_70]
+                -gencode arch=compute_75,code=[sm_75,compute_75]
 		-Xcompiler
 		-fPIC
 		-DGPU
@@ -82,7 +82,7 @@ if(USE_GPU)
         endif()
 
         if(USE_CUDNN_HALF)
-                #list(APPEND CUDA_NVCC_FLAGS -DCUDNN_HALF)
+                list(APPEND CUDA_NVCC_FLAGS -DCUDNN_HALF)
         endif()
 
 
