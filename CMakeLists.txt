@@ -82,6 +82,7 @@ if(USE_GPU)
         endif()
 
         if(USE_CUDNN_HALF)
+                SET(CUDNN_HALF ON)
                 list(APPEND CUDA_NVCC_FLAGS -DCUDNN_HALF)
         endif()
 
