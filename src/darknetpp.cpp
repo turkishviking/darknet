@@ -42,25 +42,27 @@ std::vector<yoloDetection> Darknetpp::detect(cv::Mat &inputImage, float threshol
 
     for(bbox_t &box : boxes)
     {
-        int objId = 0;
-        int leftTopX = 0, leftTopY = 0, rightBotX = 0,rightBotY = 0;
-        /*leftTopX = 1 + box.x - box.w / 2;
-        leftTopY = 1 + imageHeightPixels*(boxes[objId].y - boxes[objId].h / 2);
-        rightBotX = 1 + imageWidthPixels*(boxes[objId].x + boxes[objId].w / 2);
-        rightBotY = 1 + imageHeightPixels*(boxes[objId].y + boxes[objId].h / 2);*/
-
-        yoloDetection yoDet;
-        yoDet.label = labels[box.obj_id];
-        yoDet.x = box.x;
-        yoDet.y = box.y;
-        yoDet.width = box.w;
-        yoDet.height = box.h;
-        yoDet.rx = yoDet.x / (float)inputImage.cols;
-        yoDet.ry = yoDet.y / (float)inputImage.rows;
-        yoDet.rw = yoDet.width / (float)inputImage.cols;
-        yoDet.rh = yoDet.height / (float)inputImage.rows;
-        yoDet.prob = box.prob;
-        result.emplace_back(yoDet);
+        if(box.obj_id < labels.size())
+        {
+            int objId = 0;
+            int leftTopX = 0, leftTopY = 0, rightBotX = 0,rightBotY = 0;
+            yoloDetection yoDet;
+            yoDet.label = labels[box.obj_id];
+            yoDet.x = box.x;
+            yoDet.y = box.y;
+            yoDet.width = box.w;
+            yoDet.height = box.h;
+            yoDet.rx = yoDet.x / (float)inputImage.cols;
+            yoDet.ry = yoDet.y / (float)inputImage.rows;
+            yoDet.rw = yoDet.width / (float)inputImage.cols;
+            yoDet.rh = yoDet.height / (float)inputImage.rows;
+            yoDet.prob = box.prob;
+            result.emplace_back(yoDet);
+        }
+        else
+        {
+            throw std::invalid_argument("not enough categories (" + std::to_string(labels.size()) + ") to handle object category: " +std::to_string(box.obj_id) );
+        }
 
     }
 
